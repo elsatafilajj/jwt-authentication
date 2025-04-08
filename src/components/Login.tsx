@@ -4,6 +4,7 @@ import LogoImg from "../assets/stuck-full.png";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../api/api";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const { mutateAsync } = useMutation({
@@ -103,10 +104,13 @@ const Login = () => {
 
                 <p className="text-sm font-light text-green-900">
                   You don't have an account?
-                  <a href="#" className="font-medium text-green-800 underline">
+                  <Link
+                    to="/signup"
+                    className="font-medium text-green-800 underline"
+                  >
                     {" "}
                     Signin here
-                  </a>
+                  </Link>
                 </p>
               </Form>
             </Formik>

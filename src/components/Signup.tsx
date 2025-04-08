@@ -3,6 +3,7 @@ import * as Yup from "yup";
 import LogoImg from "../assets/stuck-full.png";
 import { useMutation } from "@tanstack/react-query";
 import { signup } from "../api/api";
+import { Link } from "react-router-dom";
 
 const Signup = () => {
   const { mutateAsync } = useMutation({
@@ -182,9 +183,12 @@ const Signup = () => {
 
                 <p className="text-sm font-light text-green-900">
                   Already have an account?{" "}
-                  <a href="#" className="font-medium text-green-800 underline">
+                  <Link
+                    to="/login"
+                    className="font-medium text-green-800 underline"
+                  >
                     Login here
-                  </a>
+                  </Link>
                 </p>
               </Form>
             </Formik>

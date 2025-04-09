@@ -16,6 +16,14 @@ interface SignupProps {
   password: string;
 }
 
+const setTokenToLocalStorage = (data: {
+  accessToken: string;
+  refreshToken: string;
+}) => {
+  localStorage.setItem("accessToken", data.accessToken);
+  localStorage.setItem("refreshToken", data.refreshToken);
+};
+
 export const signup = async (user: SignupProps) => {
   try {
     const response = await axiosInstance.post("/signup", {
@@ -23,6 +31,8 @@ export const signup = async (user: SignupProps) => {
       email: user.email,
       password: user.password,
     });
+
+    setTokenToLocalStorage(response.data);
     console.log(response.data);
     toast.success("You have been signed up successfully 🎉!");
     return response.data;
@@ -38,6 +48,7 @@ export const login = async (user: Partial<SignupProps>) => {
       email: user.email,
       password: user.password,
     });
+    setTokenToLocalStorage(response.data);
 
     console.log(response.data);
     return response.data;

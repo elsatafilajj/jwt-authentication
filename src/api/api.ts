@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import { toast } from "react-toastify";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -43,17 +44,13 @@ export const signup = async (user: SignupProps) => {
 };
 
 export const loginApiCall = async (user: Partial<SignupProps>) => {
-  try {
-    const response = await axiosInstance.post("/login", {
-      email: user.email,
-      password: user.password,
-    });
-    setTokenToLocalStorage(response.data);
+  const response = await axiosInstance.post("/login", {
+    email: user.email,
+    password: user.password,
+  });
 
-    console.log(response.data);
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    toast.error("Something went wrong!");
-  }
+  setTokenToLocalStorage(response.data);
+
+  console.log(response.data);
+  return response.data;
 };

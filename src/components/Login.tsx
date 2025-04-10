@@ -10,12 +10,18 @@ import { useAuth } from "../store/auth-context";
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+
   const { mutateAsync } = useMutation({
     mutationFn: loginApiCall,
     onSuccess: (data) => {
       toast.success("You are logged in 🎉!");
       login(data);
       navigate("/dashboard");
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message || "Invalid email or password";
+      toast.error(message);
     },
   });
 

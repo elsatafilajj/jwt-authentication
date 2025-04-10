@@ -3,9 +3,9 @@ import { AuthLayout } from "../layout/AuthLayout";
 import Login from "../components/Login";
 import Signup from "../components/Signup";
 import { MainLayout } from "../layout/MainLayout";
-import Dashboard from "../components/Dashboard";
 import Error404 from "../components/Error404";
 import { RouteNames } from "../constants/RouteNames";
+import { Dashboard } from "../components/Dashboard";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -16,10 +16,9 @@ export const appRoutes: RouteObject[] = [
     ],
   },
   {
-    path: RouteNames.Dashboard,
     element: <MainLayout />,
     children: [
-      { index: true, element: <Dashboard /> },
+      { path: RouteNames.Dashboard, element: <Dashboard /> },
 
       //   {
       //     path: RouteNames.Profile,

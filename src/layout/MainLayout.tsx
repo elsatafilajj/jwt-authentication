@@ -1,14 +1,13 @@
-import { Outlet } from "react-router-dom";
-
-// import { Header } from "../components/Header";
-// import { Sidebar } from "../components/Sidebar";
+import { Sidebar } from "lucide-react";
 import { RouteWrapper } from "../routes/RouteWrapper";
+import { Outlet } from "react-router-dom";
 
 export const MainLayout = () => {
   return (
-    <RouteWrapper>
-      {/* <Header /> */}
-      {/* <Sidebar /> */}
+    <RouteWrapper isAuthenticationPage={false}>
+      {/* <Headers/> */}
+
+      <Sidebar />
 
       <div className="page-wrapper">
         <Outlet />

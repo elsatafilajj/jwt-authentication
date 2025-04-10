@@ -11,6 +11,10 @@ const Signup = () => {
   });
 
   const validationSchema = Yup.object({
+    username: Yup.string()
+      .min(2, "Too Short")
+      .max(50, "Too Long!")
+      .required("Username is required"),
     email: Yup.string()
       .email("Invalid email address")
       .required("Email is required"),

@@ -42,7 +42,7 @@ export const signup = async (user: SignupProps) => {
   }
 };
 
-export const login = async (user: Partial<SignupProps>) => {
+export const loginApiCall = async (user: Partial<SignupProps>) => {
   try {
     const response = await axiosInstance.post("/login", {
       email: user.email,

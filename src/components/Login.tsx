@@ -2,15 +2,20 @@ import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import LogoImg from "../assets/stuck-full.png";
 import { useMutation } from "@tanstack/react-query";
-import { login } from "../api/api";
+import { loginApiCall } from "../api/api";
 import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../store/auth-context";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const { mutateAsync } = useMutation({
-    mutationFn: login,
-    onSuccess: () => {
+    mutationFn: loginApiCall,
+    onSuccess: (data) => {
       toast.success("You are logged in 🎉!");
+      login(data);
+      navigate("/dashboard");
     },
   });
 

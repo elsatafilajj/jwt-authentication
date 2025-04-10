@@ -1,13 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Signup from "./components/Signup";
+// import Signup from "./components/Signup";
 import { ToastContainer } from "react-toastify";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Login from "./components/Login";
+import { RouterProvider } from "react-router-dom";
+// import Login from "./components/Login";
+import { router } from "./routes/Routes";
 
-const router = createBrowserRouter([
-  { path: "/signup", element: <Signup /> },
-  { path: "/login", element: <Login /> },
-]);
+// const router = createBrowserRouter([
+//   { path: "/signup", element: <Signup /> },
+//   { path: "/login", element: <Login /> },
+// ]);
 
 export default function App() {
   const queryClient = new QueryClient();

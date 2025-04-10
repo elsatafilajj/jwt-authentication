@@ -1,15 +1,9 @@
+import { RouteWrapper } from "@/utils/RouteWrapper";
 import { Outlet } from "react-router-dom";
-
-// import { Header } from "../components/Header";
-// import { Sidebar } from "../components/Sidebar";
-import { RouteWrapper } from "../routes/RouteWrapper";
 
 export const MainLayout = () => {
   return (
-    <RouteWrapper>
-      {/* <Header /> */}
-      {/* <Sidebar /> */}
-
+    <RouteWrapper isAuthenticationPage={false}>
       <div className="page-wrapper">
         <Outlet />
       </div>

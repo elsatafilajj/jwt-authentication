@@ -1,16 +1,25 @@
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import LogoImg from "../assets/stuck-full.png";
+import LogoImg from "../assets/logo.png";
 import { useMutation } from "@tanstack/react-query";
-import { login } from "../api/api";
+import { login as loginApiCall } from "../api/api";
 import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../store/auth-context";
 
 const Login = () => {
+  const { login } = useAuth();
+
+  const navigate = useNavigate();
+
   const { mutateAsync } = useMutation({
-    mutationFn: login,
+    mutationFn: loginApiCall,
     onSuccess: () => {
-      toast.success("You are logged in 🎉!");
+      login();
+      navigate("/");
+    },
+    onError: () => {
+      toast.error("Invalid email or password");
     },
   });
 
@@ -32,7 +41,7 @@ const Login = () => {
               href="#"
               className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
             >
-              <img className="w-auto h-6  mr-2" src={LogoImg} alt="logo" />
+              <img className="w-auto h-6 mr-2" src={LogoImg} alt="logo" />
             </a>
             <h1 className="text-xl font-bold leading-tight tracking-tight text-green-900 md:text-2xl">
               Log in

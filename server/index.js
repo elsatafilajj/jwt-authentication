@@ -3,12 +3,12 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs-extra");
 const dotenv = require("dotenv");
+const cors = require("cors");
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const cors = require("cors");
 const USERS_FILE = process.env.USERS_FILE;
 
 app.use(
@@ -17,11 +17,9 @@ app.use(
   })
 );
 
-// app.options("*", cors());
-
 app.use(express.json());
 
-// Helper function to load users from the file
+// Load users from file
 const loadUsers = async () => {
   try {
     const data = await fs.readJson(USERS_FILE);
@@ -31,29 +29,53 @@ const loadUsers = async () => {
   }
 };
 
-// Helper function to save users to the file
+// Save users to file
 const saveUsers = async (users) => {
   await fs.writeJson(USERS_FILE, users);
 };
 
-// Function to generate access and refresh tokens
+// Generate JWT access and refresh tokens
 const generateTokens = (email) => {
-  // Access Token (JWT)
   const accessToken = jwt.sign({ userId: email }, process.env.JWT_SECRET, {
-    expiresIn: "15m", // short expiration for access token
+    expiresIn: "15m",
   });
 
-  // Refresh Token (JWT)
   const refreshToken = jwt.sign({ userId: email }, process.env.JWT_SECRET, {
-    expiresIn: "7d", // longer expiration for refresh token
+    expiresIn: "7d",
   });
 
   return { accessToken, refreshToken };
 };
 
-// Signup Route
+// Middleware to verify access token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(" ")[1];
+
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+// Middleware to check admin role
+const requireAdmin = async (req, res, next) => {
+  const users = await loadUsers();
+  const currentUser = users.find((u) => u.email === req.user.userId);
+
+  if (!currentUser || !currentUser.isAdmin) {
+    return res.status(403).json({ msg: "Access denied. Admins only." });
+  }
+
+  next();
+};
+
+// Signup
 app.post("/signup", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, role = "user" } = req.body; // Default role as 'user'
 
   // Load existing users
   const users = await loadUsers();
@@ -66,61 +88,58 @@ app.post("/signup", async (req, res) => {
 
   // Hash the password
   const hashedPassword = await bcrypt.hash(password, 10);
-  console.log(hashedPassword);
 
-  // Create new user
-  const newUser = { username, email, password: hashedPassword };
-  users.push(newUser);
+  // Create new user with role
+  const newUser = {
+    username,
+    email,
+    password: hashedPassword,
+    role, // Add the role here
+  };
 
-  // Save new user list
-  await saveUsers(users);
+  console.log("New user data:", newUser); // Debugging line to see if the role is correctly added
 
   // Generate JWT tokens (access and refresh)
   const { accessToken, refreshToken } = generateTokens(newUser.email);
 
-  // Save refresh token in memory or some secure place
-  // In real-world apps, you'd store this securely, e.g., in an HttpOnly cookie or a database
+  // Add tokens to the new user object
   newUser.accessToken = accessToken;
   newUser.refreshToken = refreshToken;
 
-  // Save updated user data with refresh token (this is just for demo purposes)
+  // Push the new user to the array
+  users.push(newUser);
+
+  // Save users to the file
   await saveUsers(users);
 
+  // Respond with tokens
   res.status(201).json({ accessToken, refreshToken });
 });
 
-// Login Route
+// Login
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  // Load users
   const users = await loadUsers();
-
-  // Check if user exists
   const user = users.find((user) => user.email === email);
   if (!user) {
     return res.status(400).json({ msg: "User does not exist" });
   }
 
-  // Compare password
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     return res.status(400).json({ msg: "Invalid credentials" });
   }
 
-  // Generate JWT tokens (access and refresh)
   const { accessToken, refreshToken } = generateTokens(user.email);
-
-  // Save refresh token in user data (in a real app, you'd store it securely)
   user.refreshToken = refreshToken;
 
-  // Save updated user data
   await saveUsers(users);
 
   res.json({ accessToken, refreshToken });
 });
 
-// Refresh Token Route
+// Refresh Token
 app.post("/refresh-token", async (req, res) => {
   const { refreshToken } = req.body;
 
@@ -128,28 +147,20 @@ app.post("/refresh-token", async (req, res) => {
     return res.status(400).json({ msg: "Refresh token required" });
   }
 
-  // Load users
   const users = await loadUsers();
-
-  // Check if the refresh token matches any user
   const user = users.find((user) => user.refreshToken === refreshToken);
   if (!user) {
     return res.status(403).json({ msg: "Invalid refresh token" });
   }
 
   try {
-    // Verify the refresh token
     jwt.verify(refreshToken, process.env.JWT_SECRET);
 
-    // Generate new access and refresh tokens
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
       user.email
     );
 
-    // Update the user's refresh token
     user.refreshToken = newRefreshToken;
-
-    // Save updated user data
     await saveUsers(users);
 
     res.json({ accessToken, refreshToken: newRefreshToken });
@@ -158,7 +169,12 @@ app.post("/refresh-token", async (req, res) => {
   }
 });
 
-// Start server
+// ✅ Admin-only endpoint
+app.get("/admin/data", authenticateToken, requireAdmin, async (req, res) => {
+  res.json({ message: "Welcome Admin 👑. This is top-secret data." });
+});
+
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

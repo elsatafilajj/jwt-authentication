@@ -257,7 +257,6 @@ const generateTokens = (email, role) => {
     userId: email,
     role: role,
   };
-  console.log(payload);
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "15m",
   });
@@ -266,7 +265,6 @@ const generateTokens = (email, role) => {
     expiresIn: "7d",
   });
 
-  console.log("From generate token:", accessToken);
   return { accessToken, refreshToken };
 };
 
@@ -289,7 +287,7 @@ const requireAdmin = async (req, res, next) => {
   const users = await loadUsers();
   const currentUser = users.find((u) => u.email === req.user.userId);
 
-  if (!currentUser || !currentUser.isAdmin) {
+  if (!currentUser || currentUser.role !== "admin") {
     return res.status(403).json({ msg: "Access denied. Admins only." });
   }
 
@@ -319,8 +317,6 @@ app.post("/signup", async (req, res) => {
     password: hashedPassword,
     role, // Add the role here
   };
-
-  console.log("New user data:", newUser); // Debugging line to see if the role is correctly added
 
   // Generate JWT tokens (access and refresh)
   const { accessToken, refreshToken } = generateTokens(newUser);
@@ -359,8 +355,6 @@ app.post("/login", async (req, res) => {
   if (!isMatch) {
     return res.status(400).json({ msg: "Invalid credentials" });
   }
-
-  console.log(user.email, user.role);
 
   const { accessToken, refreshToken } = generateTokens(user.email, user.role);
   user.refreshToken = refreshToken;
@@ -414,4 +408,30 @@ app.get("/admin/data", authenticateToken, requireAdmin, async (req, res) => {
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// All users
+app.get("/users", authenticateToken, requireAdmin, async (req, res) => {
+  const users = await loadUsers();
+
+  // Remove sensitive data like passwords before sending
+  const safeUsers = users.map(({ password, refreshToken, ...rest }) => rest);
+
+  res.json(safeUsers);
+});
+
+// Logged in user
+app.get("/me", authenticateToken, async (req, res) => {
+  const users = await loadUsers();
+
+  const currentUser = users.find((user) => user.email === req.user.userId);
+
+  if (!currentUser) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  // You can choose what fields to return
+  const { password, refreshToken, ...safeUser } = currentUser;
+
+  res.json(safeUser);
 });

@@ -40,17 +40,12 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   if (token) {
     const decoded = jwtDecode(token) as decodedToken;
-    console.log("decoded token", decoded);
 
     // const decodedHeader = jwtDecode(token, { header: true });
     userRole = decoded.role as userRoleType;
-
-    console.log(userRole);
   }
-  console.log(userRole);
 
   const login = () => {
-    console.log(userRole);
     setIsAuthenticated(true);
   };
 

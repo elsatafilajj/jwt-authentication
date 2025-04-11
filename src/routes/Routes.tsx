@@ -26,7 +26,9 @@ export const appRoutes: RouteObject[] = [
   },
   {
     element: <AdminLayout />,
-    children: [{ path: "/adminDashboard", element: <AdminDashboard /> }],
+    children: [
+      { path: RouteNames.AdminDashboard, element: <AdminDashboard /> },
+    ],
   },
 
   {

@@ -4,13 +4,19 @@ import LogoImg from "../assets/logo.png";
 import { useMutation } from "@tanstack/react-query";
 import { signup } from "../api/api";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/store/auth-context";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const { mutateAsync } = useMutation({
     mutationFn: signup,
-    onSuccess: () => navigate("/"),
+
+    onSuccess: () => {
+      login();
+      navigate("/");
+    },
   });
 
   const validationSchema = Yup.object({

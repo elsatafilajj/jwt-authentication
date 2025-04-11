@@ -24,12 +24,17 @@ export const RouteWrapper = ({
   }
 
   if (!isAuthenticated && !isAuthenticationPage) {
-    <Navigate to="/" />;
+    <Navigate to="/login" />;
   }
 
-  if (isAuthenticated && requiredRole && userRole !== requiredRole) {
+  if (
+    isAuthenticated &&
+    requiredRole &&
+    userRole !== requiredRole &&
+    !isAuthenticationPage
+  ) {
     return (
-      <Navigate to={userRole === "admin" ? "/adminDashboard" : "dashboard"} />
+      <Navigate to={userRole === "admin" ? "/adminDashboard" : "/dashboard"} />
     );
   }
 

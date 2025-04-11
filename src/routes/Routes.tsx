@@ -8,6 +8,8 @@ import Login from "../components/Login";
 import Signup from "../components/Signup";
 import Dashboard from "../components/Dashboard";
 import Error404 from "../components/Error404";
+import AdminDashboard from "@/components/AdminDashboard";
+import { AdminLayout } from "@/layout/AdminLayout";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -19,8 +21,13 @@ export const appRoutes: RouteObject[] = [
   },
   {
     element: <MainLayout />,
-    children: [{ index: true, element: <Dashboard /> }],
+    children: [{ path: RouteNames.Dashboard, element: <Dashboard /> }],
   },
+  {
+    element: <AdminLayout />,
+    children: [{ path: "/adminDashboard", element: <AdminDashboard /> }],
+  },
+
   {
     path: "*",
     element: <Error404 />,

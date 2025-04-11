@@ -17,6 +17,7 @@ export const appRoutes: RouteObject[] = [
     children: [
       { path: RouteNames.Login, element: <Login /> },
       { path: RouteNames.Signup, element: <Signup /> },
+      { index: true, element: <Login /> },
     ],
   },
   {

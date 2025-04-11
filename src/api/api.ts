@@ -55,3 +55,15 @@ export const login = async (user: Partial<SignupProps>) => {
   console.log(response.data);
   return response.data;
 };
+
+export const fetchUserInfo = async () => {
+  const token = localStorage.getItem("accessToken");
+
+  const response = await axiosInstance.get("/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  console.log(response.data);
+  return response.data;
+};

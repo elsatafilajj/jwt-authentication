@@ -1,20 +1,17 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-// import Signup from "./components/Signup";
 import { ToastContainer } from "react-toastify";
 import { RouterProvider } from "react-router-dom";
-// import Login from "./components/Login";
-import { router } from "./routes/Routes";
 
-// const router = createBrowserRouter([
-//   { path: "/signup", element: <Signup /> },
-//   { path: "/login", element: <Login /> },
-// ]);
+import AuthContextProvider from "./store/auth-context";
+import { router } from "./routes/Routes";
 
 export default function App() {
   const queryClient = new QueryClient();
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <AuthContextProvider>
+        <RouterProvider router={router} />
+      </AuthContextProvider>
       <ToastContainer />
     </QueryClientProvider>
   );

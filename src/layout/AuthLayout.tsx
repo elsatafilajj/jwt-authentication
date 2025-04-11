@@ -1,6 +1,5 @@
-import { Outlet } from "react-router-dom";
-
 import { RouteWrapper } from "../routes/RouteWrapper";
+import { Outlet } from "react-router-dom";
 
 export const AuthLayout = () => {
   return (

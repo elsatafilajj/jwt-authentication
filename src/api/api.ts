@@ -2,19 +2,16 @@ import axios from "axios";
 
 import { toast } from "react-toastify";
 
-const baseUrl = import.meta.env.VITE_BASE_URL;
-console.log(baseUrl);
-
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
   headers: { "Content-type": "application/json" },
 });
-console.log(import.meta.env.VITE_BASE_URL);
 
 interface SignupProps {
   username: string;
   email: string;
   password: string;
+  role?: "user" | "admin";
 }
 
 const setTokenToLocalStorage = (data: {
@@ -27,11 +24,16 @@ const setTokenToLocalStorage = (data: {
 
 export const signup = async (user: SignupProps) => {
   try {
-    const response = await axiosInstance.post("/signup", {
+    const requestBody: SignupProps = {
       username: user.username,
       email: user.email,
       password: user.password,
-    });
+    };
+
+    if (user.role) {
+      requestBody.role = user.role;
+    }
+    const response = await axiosInstance.post("/signup", requestBody);
 
     setTokenToLocalStorage(response.data);
     console.log(response.data);
@@ -43,12 +45,11 @@ export const signup = async (user: SignupProps) => {
   }
 };
 
-export const loginApiCall = async (user: Partial<SignupProps>) => {
+export const login = async (user: Partial<SignupProps>) => {
   const response = await axiosInstance.post("/login", {
     email: user.email,
     password: user.password,
   });
-
   setTokenToLocalStorage(response.data);
 
   console.log(response.data);

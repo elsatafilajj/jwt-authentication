@@ -11,6 +11,7 @@ interface SignupProps {
   username: string;
   email: string;
   password: string;
+  role?: "user" | "admin";
 }
 
 const setTokenToLocalStorage = (data: {
@@ -23,11 +24,16 @@ const setTokenToLocalStorage = (data: {
 
 export const signup = async (user: SignupProps) => {
   try {
-    const response = await axiosInstance.post("/signup", {
+    const requestBody: SignupProps = {
       username: user.username,
       email: user.email,
       password: user.password,
-    });
+    };
+
+    if (user.role) {
+      requestBody.role = user.role;
+    }
+    const response = await axiosInstance.post("/signup", requestBody);
 
     setTokenToLocalStorage(response.data);
     console.log(response.data);

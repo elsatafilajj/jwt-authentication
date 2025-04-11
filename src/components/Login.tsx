@@ -112,13 +112,12 @@ const Login = () => {
                 </button>
 
                 <p className="text-sm font-light text-green-900">
-                  You don't have an account?
+                  You don't have an account?{" "}
                   <Link
                     to="/signup"
                     className="font-medium text-green-800 underline"
                   >
-                    {" "}
-                    Signin here
+                    Signup here
                   </Link>
                 </p>
               </Form>

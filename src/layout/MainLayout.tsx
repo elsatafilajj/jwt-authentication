@@ -1,4 +1,4 @@
-import { RouteWrapper } from "@/utils/RouteWrapper";
+import { RouteWrapper } from "@/routes/RouteWrapper";
 import { Outlet } from "react-router-dom";
 
 export const MainLayout = () => {

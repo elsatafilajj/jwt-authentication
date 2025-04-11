@@ -1,3 +1,4 @@
+import { jwtDecode } from "jwt-decode";
 import {
   createContext,
   ReactNode,
@@ -6,19 +7,20 @@ import {
   useState,
 } from "react";
 
-// interface User {
-//   username: string;
-//   email: string;
-//   password: string;
-//   confirmPassword: string;
-//   terms: boolean;
-// }
-
+export type userRoleType = "admin" | "user";
 type AuthContextType = {
   login: () => void;
   logout: () => void;
   isAuthenticated: boolean;
+  userRole: userRoleType | null;
 };
+
+interface decodedToken {
+  userId: string;
+  role: userRoleType;
+  iat: number;
+  exp: number;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -32,10 +34,24 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = () => {
-    setIsAuthenticated(true);
+  const token = localStorage.getItem("accessToken");
 
-    // localStorage.setItem("isAuthenticated", "true");
+  let userRole = null;
+
+  if (token) {
+    const decoded = jwtDecode(token) as decodedToken;
+    console.log("decoded token", decoded);
+
+    // const decodedHeader = jwtDecode(token, { header: true });
+    userRole = decoded.role as userRoleType;
+
+    console.log(userRole);
+  }
+  console.log(userRole);
+
+  const login = () => {
+    console.log(userRole);
+    setIsAuthenticated(true);
   };
 
   const logout = () => {
@@ -44,7 +60,7 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ login, logout, isAuthenticated, userRole }}>
       {children}
     </AuthContext.Provider>
   );

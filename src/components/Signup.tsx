@@ -1,13 +1,22 @@
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import LogoImg from "../assets/stuck-full.png";
+import LogoImg from "../assets/logo.png";
 import { useMutation } from "@tanstack/react-query";
 import { signup } from "../api/api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/store/auth-context";
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const { mutateAsync } = useMutation({
     mutationFn: signup,
+
+    onSuccess: () => {
+      login();
+      navigate("/");
+    },
   });
 
   const validationSchema = Yup.object({

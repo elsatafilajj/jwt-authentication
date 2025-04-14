@@ -56,40 +56,17 @@ export const login = async (user: Partial<SignupProps>) => {
   return response.data;
 };
 
-export const getUser = async () => {
+
+export const fetchUserInfo = async () => {
   const token = localStorage.getItem("accessToken");
+
   const response = await axiosInstance.get("/me", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-  // setTokenToLocalStorage(response.data);
 
-  console.log(response.data);
   return response.data;
 };
-// export const getUser = async () => {
-//   let token = localStorage.getItem("accessToken");
 
-//   if (!token) {
-//     console.warn("No access token found! Attempting refresh...");
-//     token = await refreshToken(); // Get a new token
-//     if (!token) {
-//       console.error("Unable to refresh token. Logging out.");
-//       return null;
-//     }
-//   }
 
-//   try {
-//     const response = await customFetch.get("auth/me", {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-//     console.log("User data:", response.data);
-//     return response.data;
-//   } catch (error) {
-//     console.error("Failed to fetch user:", error);
-//     throw new Error("Failed to fetch user.");
-//   }
-// };

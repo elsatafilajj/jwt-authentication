@@ -2,7 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../store/auth-context";
 import { Button } from "../components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+
 import { getUser } from "@/api/api";
+import { fetchUserInfo } from "@/api/api";
+
 
 const Dashboard = () => {
   const { logout } = useAuth();
@@ -15,7 +18,8 @@ const Dashboard = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["user"],
-    queryFn: getUser,
+
+    queryFn: fetchUserInfo,
   });
 
   return (

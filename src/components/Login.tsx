@@ -4,19 +4,16 @@ import LogoImg from "../assets/logo.png";
 import { useMutation } from "@tanstack/react-query";
 import { login as loginApiCall } from "../api/api";
 import { toast } from "react-toastify";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../store/auth-context";
 
 const Login = () => {
   const { login } = useAuth();
 
-  const navigate = useNavigate();
-
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: loginApiCall,
     onSuccess: () => {
       login();
-      navigate("/");
     },
     onError: () => {
       toast.error("Invalid email or password");
@@ -107,8 +104,9 @@ const Login = () => {
                 <button
                   type="submit"
                   className="w-full text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                  disabled={isPending}
                 >
-                  Login
+                  {isPending ? "Logging in" : "Login"}
                 </button>
 
                 <p className="text-sm font-light text-green-900">

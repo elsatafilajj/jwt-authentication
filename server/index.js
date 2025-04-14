@@ -40,7 +40,6 @@ const generateTokens = (email, role) => {
     userId: email,
     role: role,
   };
-  console.log(payload);
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "15m",
   });
@@ -49,7 +48,7 @@ const generateTokens = (email, role) => {
     expiresIn: "7d",
   });
 
-  console.log("From generate token:", accessToken);
+  // console.log("From generate token:", accessToken);
   return { accessToken, refreshToken };
 };
 
@@ -60,7 +59,7 @@ const authenticateToken = (req, res, next) => {
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) return res.sendStatus(401);
     req.user = user;
     next();
   });
@@ -102,10 +101,11 @@ app.post("/signup", async (req, res) => {
     role, // Add the role here
   };
 
-  console.log("New user data:", newUser); // Debugging line to see if the role is correctly added
-
   // Generate JWT tokens (access and refresh)
-  const { accessToken, refreshToken } = generateTokens(newUser);
+  const { accessToken, refreshToken } = generateTokens(
+    newUser.email,
+    newUser.role
+  );
 
   // Add tokens to the new user object
   newUser.accessToken = accessToken;
@@ -169,17 +169,19 @@ app.post("/refresh-token", async (req, res) => {
   const users = await loadUsers();
   const user = users.find((user) => user.refreshToken === refreshToken);
   if (!user) {
-    return res.status(403).json({ msg: "Invalid refresh token" });
+    return res.status(401).json({ msg: "Invalid refresh token" });
   }
 
   try {
     jwt.verify(refreshToken, process.env.JWT_SECRET);
 
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
-      user.email
+      user.email,
+      user.role
     );
 
     user.refreshToken = newRefreshToken;
+
     await saveUsers(users);
 
     res.json({ accessToken, refreshToken: newRefreshToken });

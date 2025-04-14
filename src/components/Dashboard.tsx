@@ -1,16 +1,14 @@
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../store/auth-context";
 import { Button } from "../components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserInfo } from "@/api/api";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   const { logout } = useAuth();
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
   };
 
   const { data, isLoading } = useQuery({
@@ -26,7 +24,17 @@ const Dashboard = () => {
 
       <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-6 space-y-4">
         {isLoading ? (
-          <p className="text-center text-gray-500">Loading user info...</p>
+          <>
+            <p className="text-center text-gray-500">Loading user info...</p>
+            <div className="pt-4">
+              <Button
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                onClick={handleLogout}
+              >
+                Log out
+              </Button>
+            </div>
+          </>
         ) : (
           <>
             <div className="space-y-2">
@@ -42,6 +50,9 @@ const Dashboard = () => {
                 <span className="font-semibold text-gray-700">Role:</span>{" "}
                 {data?.role}
               </p>
+              <Link to={"/stickyNotes"} className="underline">
+                Go do some to brainstorming
+              </Link>
             </div>
 
             <div className="pt-4">

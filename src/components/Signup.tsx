@@ -3,19 +3,17 @@ import * as Yup from "yup";
 import LogoImg from "../assets/logo.png";
 import { useMutation } from "@tanstack/react-query";
 import { signup } from "../api/api";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/store/auth-context";
 
 const Signup = () => {
-  const navigate = useNavigate();
   const { login } = useAuth();
 
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: signup,
 
     onSuccess: () => {
       login();
-      navigate("/");
     },
   });
 
@@ -190,8 +188,9 @@ const Signup = () => {
                 <button
                   type="submit"
                   className="w-full text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                  disabled={isPending}
                 >
-                  Create an account
+                  {isPending ? "Creating account..." : "Create an account"}
                 </button>
 
                 <p className="text-sm font-light text-green-900">

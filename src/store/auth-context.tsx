@@ -12,8 +12,8 @@ type AuthContextType = {
   login: () => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
   userRole: userRoleType | null;
-  loading: boolean;
 };
 
 interface decodedToken {
@@ -28,7 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<userRoleType | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedAuth = localStorage.getItem("accessToken");
@@ -39,13 +39,13 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         setIsAuthenticated(true);
         setUserRole(decoded.role);
       } catch (error) {
-        console.error("Invalid token: ", error);
+        console.error("Invalid token:", error);
         setIsAuthenticated(false);
         setUserRole(null);
       }
-
-      setLoading(false);
     }
+
+    setIsLoading(false);
   }, []);
 
   const login = () => {
@@ -53,14 +53,16 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    setIsLoading(true);
     setIsAuthenticated(false);
-    localStorage.removeItem("accessToken");
     setUserRole(null);
+    localStorage.removeItem("accessToken");
+    setIsLoading(false);
   };
 
   return (
     <AuthContext.Provider
-      value={{ login, logout, isAuthenticated, userRole, loading }}
+      value={{ login, logout, isAuthenticated, userRole, isLoading }}
     >
       {children}
     </AuthContext.Provider>

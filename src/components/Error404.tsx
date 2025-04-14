@@ -19,7 +19,7 @@ const Error404 = () => {
           to="/"
           className="px-5 py-2 rounded-full bg-[#726627] hover:bg-[#392e08] transition duration-300"
         >
-          Go to Homepage
+          Go to Login
         </Link>
       </div>
     </div>

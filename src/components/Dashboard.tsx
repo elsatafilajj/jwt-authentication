@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../store/auth-context";
 import { Button } from "../components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -18,9 +18,9 @@ const Dashboard = () => {
     queryFn: fetchUserInfo,
   });
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
+  // if (isLoading) {
+  //   return <p>Loading...</p>;
+  // }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
@@ -55,13 +55,19 @@ const Dashboard = () => {
               >
                 Log out
               </Button>
+              <Link
+                to="/stickyNotes"
+                className="px-5 py-2 rounded-full bg-[#726627] hover:bg-[#392e08] transition duration-300"
+              >
+                Go to your projects
+              </Link>
             </div>
           </>
         )}
       </div>
 
       {/* Notes Section + Drop Zone */}
-      <div className="w-full max-w-3xl mt-10 bg-white rounded-2xl shadow-md p-6 space-y-4">
+      {/* <div className="w-full max-w-3xl mt-10 bg-white rounded-2xl shadow-md p-6 space-y-4">
         <h3 className="text-2xl font-semibold text-gray-800 mb-4">Notes</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -80,7 +86,7 @@ const Dashboard = () => {
           <p className="text-lg font-medium">Drop your ideas or notes here</p>
           <p className="text-sm text-gray-400 mt-1"></p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

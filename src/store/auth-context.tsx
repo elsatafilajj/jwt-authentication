@@ -13,6 +13,7 @@ type AuthContextType = {
   logout: () => void;
   isAuthenticated: boolean;
   userRole: userRoleType | null;
+  loading: boolean;
 };
 
 interface decodedToken {
@@ -26,41 +27,41 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<userRoleType | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedAuth = localStorage.getItem("accessToken");
+
     if (storedAuth) {
-      setIsAuthenticated(true);
+      try {
+        const decoded = jwtDecode(storedAuth) as decodedToken;
+        setIsAuthenticated(true);
+        setUserRole(decoded.role);
+      } catch (error) {
+        console.error("Invalid token: ", error);
+        setIsAuthenticated(false);
+        setUserRole(null);
+      }
+
+      setLoading(false);
     }
   }, []);
 
-  const token = localStorage.getItem("accessToken");
-
-  let userRole = null;
-
-  if (token) {
-    const decoded = jwtDecode(token) as decodedToken;
-    console.log("decoded token", decoded);
-
-    // const decodedHeader = jwtDecode(token, { header: true });
-    userRole = decoded.role as userRoleType;
-
-    console.log(userRole);
-  }
-  console.log(userRole);
-
   const login = () => {
-    console.log(userRole);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("accessToken");
+    setUserRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ login, logout, isAuthenticated, userRole }}>
+    <AuthContext.Provider
+      value={{ login, logout, isAuthenticated, userRole, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

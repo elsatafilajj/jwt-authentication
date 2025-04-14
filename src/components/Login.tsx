@@ -4,24 +4,28 @@ import LogoImg from "../assets/logo.png";
 import { useMutation } from "@tanstack/react-query";
 import { login as loginApiCall } from "../api/api";
 import { toast } from "react-toastify";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../store/auth-context";
 
 const Login = () => {
   const { login } = useAuth();
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const { mutateAsync } = useMutation({
     mutationFn: loginApiCall,
     onSuccess: () => {
       login();
-      navigate("/");
+      // navigate("/");
     },
     onError: () => {
       toast.error("Invalid email or password");
     },
   });
+
+  // if (isPending) {
+  //   return <p>Loading...</p>;
+  // }
 
   const validationSchema = Yup.object({
     email: Yup.string()

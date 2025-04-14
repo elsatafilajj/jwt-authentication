@@ -18,6 +18,10 @@ const Dashboard = () => {
     queryFn: fetchUserInfo,
   });
 
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
       <h2 className="text-4xl font-bold mb-6 text-gray-800">
@@ -46,7 +50,7 @@ const Dashboard = () => {
 
             <div className="pt-4">
               <Button
-                className="w-full bg-red-500 hover:bg-red-600 text-white"
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
                 onClick={handleLogout}
               >
                 Log out

@@ -37,6 +37,7 @@ export const RouteWrapper = ({
       <Navigate to={userRole === "admin" ? "/adminDashboard" : "/dashboard"} />
     );
   }
+  console.log({ isAuthenticated, userRole, isLoading });
 
   return <>{children}</>;
 };

@@ -11,14 +11,22 @@ const Login = () => {
   const { login } = useAuth();
 
   const { mutateAsync, isPending } = useMutation({
+  // const navigate = useNavigate();
+
+  const { mutateAsync } = useMutation({
     mutationFn: loginApiCall,
     onSuccess: () => {
       login();
+      // navigate("/");
     },
     onError: () => {
       toast.error("Invalid email or password");
     },
   });
+
+  // if (isPending) {
+  //   return <p>Loading...</p>;
+  // }
 
   const validationSchema = Yup.object({
     email: Yup.string()

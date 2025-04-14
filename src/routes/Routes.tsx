@@ -12,6 +12,8 @@ import AdminDashboard from "@/components/AdminDashboard";
 import { AdminLayout } from "@/layout/AdminLayout";
 import StickyNotes from "@/components/StickyNotes";
 
+import StickyNotes from "@/components/StickyNotes";
+
 export const appRoutes: RouteObject[] = [
   {
     element: <AuthLayout />,

@@ -41,10 +41,12 @@ const generateTokens = (email, role) => {
     role: role,
   };
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    // expiresIn: "15m",
     expiresIn: "15m",
   });
 
   const refreshToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    // expiresIn: "7d",
     expiresIn: "7d",
   });
 

@@ -6,11 +6,8 @@
   "tailwind": {
     "config": "",
     "css": "src/index.css",
-<<<<<<< HEAD
     "baseColor": "neutral",
-=======
     "baseColor": "zinc",
->>>>>>> 1a8b1ad (Fix RouteWrapper Redirect issues)
     "cssVariables": true,
     "prefix": ""
   },
@@ -22,8 +19,4 @@
     "hooks": "@/hooks"
   },
   "iconLibrary": "lucide"
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 1a8b1ad (Fix RouteWrapper Redirect issues)

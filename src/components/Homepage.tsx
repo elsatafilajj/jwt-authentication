@@ -1,10 +1,10 @@
 import { useAuth } from "../store/auth-context";
-import { Button } from "../components/ui/button";
+import { Button } from "./ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserInfo } from "@/api/api";
 import { Link } from "react-router-dom";
 
-const Dashboard = () => {
+const Homepage = () => {
   const { logout } = useAuth();
 
   const handleLogout = () => {
@@ -36,8 +36,8 @@ const Dashboard = () => {
             </div>
           </>
         ) : (
-          <>
-            <div className="space-y-2">
+          <div className="flex flex-col justify-center">
+            <div className="space-y-2 ">
               <p>
                 <span className="font-semibold text-gray-700">Email:</span>{" "}
                 {data?.email}
@@ -50,26 +50,26 @@ const Dashboard = () => {
                 <span className="font-semibold text-gray-700">Role:</span>{" "}
                 {data?.role}
               </p>
-              <Link to={"/stickyNotes"} className="underline">
+              <Link to={"/brainstorm"} className="underline">
                 Go do some to brainstorming
               </Link>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-4 ">
               <Button
                 className="w-full bg-green-600 hover:bg-green-700 text-white"
                 onClick={handleLogout}
               >
                 Log out
               </Button>
-              <Link
-                to="/stickyNotes"
-                className="px-5 py-2 rounded-full bg-[#726627] hover:bg-[#392e08] transition duration-300"
-              >
-                Go to your projects
-              </Link>
             </div>
-          </>
+            <Link
+              to="/stickyNotes"
+              className="px-5 mt-5 py-2 rounded-full bg-green-600 hover:bg-green-700 text-white transition duration-300 self-center"
+            >
+              Go to your projects
+            </Link>
+          </div>
         )}
       </div>
 
@@ -98,4 +98,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Homepage;

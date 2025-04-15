@@ -1,9 +1,9 @@
 import { useAuth } from "../store/auth-context";
-import { Button } from "../components/ui/button";
+import { Button } from "./ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserInfo } from "@/api/api";
 
-const Dashboard = () => {
+const AdminHomepage = () => {
   const { logout } = useAuth();
 
   const handleLogout = () => {
@@ -70,4 +70,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default AdminHomepage;

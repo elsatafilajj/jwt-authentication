@@ -1,59 +1,79 @@
 import { useRef, useState } from "react";
+import { useDrop } from "react-dnd";
+
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import DraggableNote from "./DraggableNote";
+import Sidebar from "./Sidebar";
+
+// export interface moveNoteProps {
+//   id: number;
+//   newX: number;
+//   newY: number;
+// }
+
+let idCounter = 2;
 
 const StickyNotes = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const dropRef = useRef<HTMLDivElement>(null);
 
-  const onWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomSpeed = 0.001;
-    setScale((prev) => Math.max(0.1, prev - e.deltaY * zoomSpeed));
+  const [notes, setNotes] = useState([
+    { id: 1, x: 100, y: 100, text: "Welcome!" },
+  ]);
+
+  const moveNote = (id: number, newX: number, newY: number) => {
+    setNotes((prev) =>
+      prev.map((note) =>
+        note.id === id ? { ...note, x: newX, y: newY } : note
+      )
+    );
   };
 
-  const onMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
-  };
+  const [, drop] = useDrop({
+    accept: ["NEW_NOTE"],
+    drop: (item, monitor) => {
+      const offset = monitor.getClientOffset();
+      const boundingRect = document
+        .getElementById("canvas-area")
+        ?.getBoundingClientRect();
 
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    setPosition({
-      x: e.clientX - startPos.x,
-      y: e.clientY - startPos.y,
-    });
-  };
+      if (offset && boundingRect) {
+        const x = offset.x - boundingRect.left;
+        const y = offset.y - boundingRect.top;
 
-  const onMouseUp = () => {
-    setIsDragging(false);
-  };
+        const newNote = {
+          id: idCounter++,
+          x,
+          y,
+          text: "New Sticky",
+        };
+        setNotes((prev) => [...prev, newNote]);
+      }
+    },
+  });
+
+  drop(dropRef);
 
   return (
-    <div
-      ref={containerRef}
-      className="w-screen h-screen overflow-hidden bg-gray-200"
-      onWheel={onWheel}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-    >
-      <div
-        className="w-full h-full"
-        style={{
-          transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-          transformOrigin: "top left",
-          width: "5000px",
-          height: "5000px",
-        }}
-      >
-        {/* Example content */}
-        <div className="w-40 h-40 bg-green-500 absolute top-0 left-0">Box</div>
-        <div className="w-40 h-40 bg-blue-500 absolute top-[300px] left-[500px]">
-          Another Box
-        </div>
-      </div>
+    <div style={{ display: "flex", height: "100vh" }}>
+      <Sidebar />
+      <TransformWrapper>
+        <TransformComponent>
+          <div
+            ref={dropRef}
+            id="canvas-area"
+            style={{
+              width: "5000px",
+              height: "5000px",
+              position: "relative",
+              background: "#fffef0",
+            }}
+          >
+            {notes.map((note) => (
+              <DraggableNote key={note.id} note={note} moveNote={moveNote} />
+            ))}
+          </div>
+        </TransformComponent>
+      </TransformWrapper>
     </div>
   );
 };

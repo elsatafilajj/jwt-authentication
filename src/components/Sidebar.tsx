@@ -1,62 +1,54 @@
-// components/Sidebar.tsx
-import { NavLink } from "react-router-dom";
-import { Home, BookOpen, Star, LogOut } from "lucide-react";
+import { useRef } from "react";
+import { useDrag } from "react-dnd";
+import { StickyNote } from "lucide-react";
 
 const Sidebar = () => {
+  const dragRef = useRef<HTMLDivElement>(null);
+
+  const [{ isDragging }, drag] = useDrag({
+    type: "NEW_NOTE",
+    item: { type: "NEW_NOTE" },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  drag(dragRef);
+
   return (
-    <aside className="h-screen w-64 bg-white shadow-md px-4 py-6 flex flex-col justify-between">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-8">
-          🍳 Let’em Cook
-        </h1>
-        <nav className="space-y-4">
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                isActive
-                  ? "bg-amber-100 text-amber-600 font-semibold"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`
-            }
-          >
-            <Home size={20} /> Dashboard
-          </NavLink>
-
-          <NavLink
-            to="/recipes"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                isActive
-                  ? "bg-amber-100 text-amber-600 font-semibold"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`
-            }
-          >
-            <BookOpen size={20} /> All Recipes
-          </NavLink>
-
-          <NavLink
-            to="/favorites"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                isActive
-                  ? "bg-amber-100 text-amber-600 font-semibold"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`
-            }
-          >
-            <Star size={20} /> Favorites
-          </NavLink>
-        </nav>
+    <div
+      style={{
+        width: "80px",
+        height: "400px",
+        background: "#f3f3f3",
+        borderRight: "1px solid #ccc",
+        padding: "10px",
+        position: "absolute",
+        left: 0,
+        // top: 150,
+        bottom: 0,
+        zIndex: 999,
+      }}
+    >
+      <div
+        ref={dragRef}
+        style={{
+          background: "#5CE65C",
+          padding: "10px",
+          borderRadius: "5px",
+          cursor: "grab",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          opacity: isDragging ? 0.4 : 1,
+          textAlign: "center",
+          objectFit: "contain",
+        }}
+      >
+        <div>
+          {" "}
+          <StickyNote />
+        </div>
       </div>
-
-      <div>
-        <button className="flex items-center gap-2 text-red-500 hover:text-red-600 transition">
-          <LogOut size={18} /> Logout
-        </button>
-      </div>
-    </aside>
+    </div>
   );
 };
 

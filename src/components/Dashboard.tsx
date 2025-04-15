@@ -65,28 +65,6 @@ const Dashboard = () => {
       >
         Go to your projects
       </Link>
-
-      {/* Notes Section + Drop Zone */}
-      {/* <div className="w-full max-w-3xl mt-10 bg-white rounded-2xl shadow-md p-6 space-y-4">
-        <h3 className="text-2xl font-semibold text-gray-800 mb-4">Notes</h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-yellow-200 p-4 rounded-xl shadow-sm text-gray-800 min-h-[100px]">
-            📝 Remember to upload profile image
-          </div>
-          <div className="bg-pink-200 p-4 rounded-xl shadow-sm text-gray-800 min-h-[100px]">
-            ✅ Set up 2FA for extra security
-          </div>
-          <div className="bg-green-200 p-4 rounded-xl shadow-sm text-gray-800 min-h-[100px]">
-            💡 New feature: bookmark recipes
-          </div>
-        </div>
-
-        <div className="mt-6 border-2 border-dashed border-gray-300 rounded-xl p-8 text-center text-gray-500 hover:border-blue-400 transition-colors duration-300">
-          <p className="text-lg font-medium">Drop your ideas or notes here</p>
-          <p className="text-sm text-gray-400 mt-1"></p>
-        </div>
-      </div> */}
     </div>
   );
 };

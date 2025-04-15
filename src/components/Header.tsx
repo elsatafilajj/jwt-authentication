@@ -1,8 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logoImg from "../assets/logo.png";
+import { useAuth } from "@/store/auth-context";
 
 const Header = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const userName = "Elsa";
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <header className="w-full h-16 px-6 bg-white shadow-md flex items-center justify-between fixed top-0 left-0 z-50">
@@ -37,7 +45,10 @@ const Header = () => {
         <span className="text-sm text-gray-600 hidden sm:block">
           Hello, {userName}
         </span>
-        <button className="text-green-600 hover:underline text-sm">
+        <button
+          className="text-green-600 hover:underline text-sm"
+          onClick={handleLogout}
+        >
           Logout
         </button>
       </div>

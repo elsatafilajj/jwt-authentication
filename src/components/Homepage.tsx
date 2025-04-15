@@ -72,6 +72,12 @@ const Homepage = () => {
           </div>
         )}
       </div>
+      <Link
+        to="/stickyNotes"
+        className="px-5 mt-5 py-2 rounded-full bg-green-600 hover:bg-green-700 transition duration-300 text-white"
+      >
+        Go to your projects
+      </Link>
 
       {/* Notes Section + Drop Zone */}
       {/* <div className="w-full max-w-3xl mt-10 bg-white rounded-2xl shadow-md p-6 space-y-4">

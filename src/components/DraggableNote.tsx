@@ -1,54 +1,49 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useDrag } from "react-dnd";
 
-export interface Note {
-  id: number;
-  content: string;
-  position: { x: number; y: number };
-}
-
 interface DraggableNoteProps {
-  note: Note;
-  setIsDragging: (draggging: boolean) => void;
+  note: { id: number; x: number; y: number; text: string };
+  moveNote: (id: number, newX: number, newY: number) => void;
 }
 
-const DraggableNote = ({ note, setIsDragging }: DraggableNoteProps) => {
-  const ref = useRef<HTMLDivElement | null>(null);
+const DraggableNote = ({ note, moveNote }: DraggableNoteProps) => {
+  const dragRef = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag({
     type: "NOTE",
-    item: () => {
-      setIsDragging(true);
-      return { id: note.id };
-    },
-    end: () => {
-      setIsDragging(false);
+    item: { ...note },
+    end: (item, monitor) => {
+      const delta = monitor.getDifferenceFromInitialOffset();
+      if (delta) {
+        const newX = item.x + delta.x;
+        const newY = item.y + delta.y;
+        moveNote(item.id, newX, newY);
+      }
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
 
-  useEffect(() => {
-    if (ref.current) {
-      drag(ref.current);
-    }
-  }, [drag]);
-
-  if (!note?.position) return null;
+  drag(dragRef);
 
   return (
     <div
-      ref={ref}
-      className={`absolute w-60 h-50 p-2 bg-yellow-200 shadow-md cursor-move rounded ${
-        isDragging ? "opacity-50" : "opacity-100"
-      }`}
+      ref={dragRef}
       style={{
-        left: `${note.position.x}px`,
-        top: `${note.position.y}px`,
+        position: "absolute",
+        left: note.x,
+        top: note.y,
+        background: "#CCFFCC",
+        padding: "10px",
+        cursor: "move",
+        opacity: isDragging ? 0.5 : 1,
+        borderRadius: "8px",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+        width: "150px",
       }}
     >
-      {note.content}
+      {note.text}
     </div>
   );
 };

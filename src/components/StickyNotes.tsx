@@ -46,6 +46,15 @@ const StickyNotes = () => {
     );
   };
 
+  const deleteNote = (id: number) => {
+    setNotes((prev) => {
+      const updatedNotes = prev.filter((note) => note.id !== id);
+
+      localStorage.setItem("notes", JSON.stringify(updatedNotes));
+      return updatedNotes;
+    });
+  };
+
   const [, drop] = useDrop<DragItem>({
     accept: "NOTE",
     drop: (item, monitor) => {
@@ -108,6 +117,7 @@ const StickyNotes = () => {
                   note={note}
                   moveNote={moveNote}
                   updateNoteText={updateNoteText}
+                  deleteNote={deleteNote}
                 />
               ))}
             </div>

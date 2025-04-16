@@ -11,6 +11,8 @@ import Error404 from "../components/Error404";
 import AdminDashboard from "@/components/AdminDashboard";
 import { AdminLayout } from "@/layout/AdminLayout";
 
+import StickyNotes from "@/components/StickyNotes";
+
 export const appRoutes: RouteObject[] = [
   {
     element: <AuthLayout />,
@@ -22,7 +24,10 @@ export const appRoutes: RouteObject[] = [
   },
   {
     element: <MainLayout />,
-    children: [{ path: RouteNames.Dashboard, element: <Dashboard /> }],
+    children: [
+      { path: RouteNames.Dashboard, element: <Dashboard /> },
+      { path: RouteNames.StickyNotes, element: <StickyNotes /> },
+    ],
   },
   {
     element: <AdminLayout />,

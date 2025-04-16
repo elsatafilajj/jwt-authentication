@@ -13,7 +13,7 @@ export const RouteWrapper = ({
   requiredRole,
   isAuthenticationPage = false,
 }: RouteWrapperProps) => {
-  const { isAuthenticated, userRole } = useAuth();
+  const { isAuthenticated, userRole, isLoading } = useAuth();
 
   if (isAuthenticated && isAuthenticationPage) {
     if (userRole === "admin") {
@@ -23,8 +23,8 @@ export const RouteWrapper = ({
     }
   }
 
-  if (!isAuthenticated && !isAuthenticationPage) {
-    <Navigate to="/login" />;
+  if (!isAuthenticated && !isAuthenticationPage && !isLoading) {
+    return <Navigate to="/login" />;
   }
 
   if (
@@ -37,6 +37,7 @@ export const RouteWrapper = ({
       <Navigate to={userRole === "admin" ? "/adminDashboard" : "/dashboard"} />
     );
   }
+  console.log({ isAuthenticated, userRole, isLoading });
 
   return <>{children}</>;
 };

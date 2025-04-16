@@ -41,13 +41,16 @@ const generateTokens = (email, role) => {
     role: role,
   };
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    // expiresIn: "15m",
     expiresIn: "15m",
   });
 
   const refreshToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    // expiresIn: "7d",
     expiresIn: "7d",
   });
 
+  // console.log("From generate token:", accessToken);
   return { accessToken, refreshToken };
 };
 
@@ -58,7 +61,7 @@ const authenticateToken = (req, res, next) => {
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) return res.sendStatus(401);
     req.user = user;
     next();
   });
@@ -101,7 +104,10 @@ app.post("/signup", async (req, res) => {
   };
 
   // Generate JWT tokens (access and refresh)
-  const { accessToken, refreshToken } = generateTokens(newUser);
+  const { accessToken, refreshToken } = generateTokens(
+    newUser.email,
+    newUser.role
+  );
 
   // Add tokens to the new user object
   newUser.accessToken = accessToken;
@@ -163,17 +169,19 @@ app.post("/refresh-token", async (req, res) => {
   const users = await loadUsers();
   const user = users.find((user) => user.refreshToken === refreshToken);
   if (!user) {
-    return res.status(403).json({ msg: "Invalid refresh token" });
+    return res.status(401).json({ msg: "Invalid refresh token" });
   }
 
   try {
     jwt.verify(refreshToken, process.env.JWT_SECRET);
 
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
-      user.email
+      user.email,
+      user.role
     );
 
     user.refreshToken = newRefreshToken;
+
     await saveUsers(users);
 
     res.json({ accessToken, refreshToken: newRefreshToken });
@@ -192,7 +200,6 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-
 // All users
 app.get("/users", authenticateToken, requireAdmin, async (req, res) => {
   const users = await loadUsers();
@@ -202,7 +209,6 @@ app.get("/users", authenticateToken, requireAdmin, async (req, res) => {
 
   res.json(safeUsers);
 });
-
 
 // Logged in user
 app.get("/me", authenticateToken, async (req, res) => {

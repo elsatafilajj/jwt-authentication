@@ -1,16 +1,12 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import logoImg from "../assets/logo.png";
 import { useAuth } from "@/store/auth-context";
 
-const Header = () => {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-  const userName = "Elsa";
+import LogoutModal from "./Modal";
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+const Header = () => {
+  const { user, isPending } = useAuth();
+  // const navigate = useNavigate();
 
   return (
     <header className="w-full h-16 px-6 bg-white shadow-md flex items-center justify-between fixed top-0 left-0 z-50">
@@ -42,15 +38,12 @@ const Header = () => {
       </nav>
 
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-600 hidden sm:block">
-          Hello, {userName}
-        </span>
-        <button
-          className="text-green-600 hover:underline text-sm"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
+        {!isPending && (
+          <span className="text-sm text-gray-600 hidden sm:block">
+            Hello, {user.username}
+          </span>
+        )}
+        <LogoutModal />
       </div>
     </header>
   );

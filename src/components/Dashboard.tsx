@@ -1,26 +1,13 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../store/auth-context";
-import { Button } from "../components/ui/button";
+import { Link } from "react-router-dom";
+
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserInfo } from "@/api/api";
 
 const Dashboard = () => {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   const { data, isLoading } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUserInfo,
   });
-
-  // if (isLoading) {
-  //   return <p>Loading...</p>;
-  // }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
@@ -46,15 +33,6 @@ const Dashboard = () => {
                 <span className="font-semibold text-gray-700">Role:</span>{" "}
                 {data?.role}
               </p>
-            </div>
-
-            <div className="pt-4">
-              <Button
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-                onClick={handleLogout}
-              >
-                Log out
-              </Button>
             </div>
           </>
         )}

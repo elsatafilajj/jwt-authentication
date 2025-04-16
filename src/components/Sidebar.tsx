@@ -16,37 +16,14 @@ const Sidebar = () => {
   drag(dragRef);
 
   return (
-    <div
-      style={{
-        width: "80px",
-        height: "400px",
-        background: "#f3f3f3",
-        borderRight: "1px solid #ccc",
-        padding: "10px",
-        position: "absolute",
-        left: 0,
-        // top: 150,
-        bottom: 0,
-        zIndex: 999,
-      }}
-    >
+    <div className="w-20 h-[100vh] bg-green-600 border-r border-green-700 p-4 fixed top-16 left-0 z-50">
       <div
         ref={dragRef}
-        style={{
-          background: "#5CE65C",
-          padding: "10px",
-          borderRadius: "5px",
-          cursor: "grab",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-          opacity: isDragging ? 0.4 : 1,
-          textAlign: "center",
-          objectFit: "contain",
-        }}
+        className={`p-4 rounded-md cursor-grab shadow-md ${
+          isDragging ? "opacity-40 " : "opacity-100"
+        } text-center text-white`}
       >
-        <div>
-          {" "}
-          <StickyNote />
-        </div>
+        <StickyNote />
       </div>
     </div>
   );

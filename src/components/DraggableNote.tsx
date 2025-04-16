@@ -70,7 +70,6 @@ const DraggableNote = ({
           <div className="text-green-800">{note.text}</div>
         )}
 
-        {/* Delete button in the top-right corner */}
         <button
           onClick={() => deleteNote(note.id)}
           className="absolute top-2 right-2 text-green-600 hover:text-green-700 rounded-full p-1 hover:bg-green-100 transition-all"

@@ -10,15 +10,22 @@ import { useAuth } from "../store/auth-context";
 const Login = () => {
   const { login } = useAuth();
 
-  const { mutateAsync, isPending } = useMutation({
+  // const navigate = useNavigate();
+
+  const { mutateAsync } = useMutation({
     mutationFn: loginApiCall,
     onSuccess: () => {
       login();
+      // navigate("/");
     },
     onError: () => {
       toast.error("Invalid email or password");
     },
   });
+
+  // if (isPending) {
+  //   return <p>Loading...</p>;
+  // }
 
   const validationSchema = Yup.object({
     email: Yup.string()
@@ -104,9 +111,8 @@ const Login = () => {
                 <button
                   type="submit"
                   className="w-full text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                  disabled={isPending}
                 >
-                  {isPending ? "Logging in" : "Login"}
+                  Login
                 </button>
 
                 <p className="text-sm font-light text-green-900">

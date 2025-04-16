@@ -1,7 +1,10 @@
 export const RouteNames = {
   Login: "/login",
   Signup: "/signup",
-  HomePage: "/homepage",
-  AdminHomepage: "/adminHomepage",
-  Brainstorm: "/brainstorm",
+  Dashboard: "/dashboard",
+  AdminDashboard: "/adminDashboard",
+  StickyNotes: "/stickyNotes",
+  // Logs: '/logs',
+  // Home: '/profile',
+  // Profile: '/profile',
 };

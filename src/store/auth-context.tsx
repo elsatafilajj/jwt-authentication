@@ -1,3 +1,5 @@
+import { fetchUserInfo } from "@/api/api";
+import { useQuery } from "@tanstack/react-query";
 import { jwtDecode } from "jwt-decode";
 import {
   createContext,
@@ -8,12 +10,24 @@ import {
 } from "react";
 
 export type userRoleType = "admin" | "user";
+
 type AuthContextType = {
   login: () => void;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
   userRole: userRoleType | null;
+  user: User;
+  isDataLoading: boolean;
+};
+
+export type User = {
+  username: string;
+  email: string;
+  password: string;
+  role: string;
+  accessToken: string;
+  refreshToken: string;
 };
 
 interface decodedToken {
@@ -60,9 +74,22 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   };
 
+  const { data: user, isPending: isDataLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: fetchUserInfo,
+    enabled: isAuthenticated,
+  });
   return (
     <AuthContext.Provider
-      value={{ login, logout, isAuthenticated, userRole, isLoading }}
+      value={{
+        login,
+        logout,
+        isAuthenticated,
+        userRole,
+        isLoading,
+        user,
+        isDataLoading,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,18 +1,17 @@
 import { createBrowserRouter, RouteObject } from "react-router-dom";
 import { RouteNames } from "../constants/RouteNames";
 
-import Error404 from "../components/Error404";
-
 import { AuthLayout } from "../layout/AuthLayout";
 import { MainLayout } from "../layout/MainLayout";
-import { AdminLayout } from "@/layout/AdminLayout";
 
 import Login from "../components/Login";
 import Signup from "../components/Signup";
+import Dashboard from "../components/Dashboard";
+import Error404 from "../components/Error404";
+import AdminDashboard from "@/components/AdminDashboard";
+import { AdminLayout } from "@/layout/AdminLayout";
 
-import Homepage from "../components/Homepage";
-import AdminHomepage from "@/components/AdminHomepage";
-import BrainstormDashboard from "@/components/BrainstormDashboard";
+import StickyNotes from "@/components/StickyNotes";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -26,16 +25,15 @@ export const appRoutes: RouteObject[] = [
   {
     element: <MainLayout />,
     children: [
-      { path: RouteNames.HomePage, element: <Homepage /> },
-      {
-        path: RouteNames.Brainstorm,
-        element: <BrainstormDashboard />,
-      },
+      { path: RouteNames.Dashboard, element: <Dashboard /> },
+      { path: RouteNames.StickyNotes, element: <StickyNotes /> },
     ],
   },
   {
     element: <AdminLayout />,
-    children: [{ path: RouteNames.AdminHomepage, element: <AdminHomepage /> }],
+    children: [
+      { path: RouteNames.AdminDashboard, element: <AdminDashboard /> },
+    ],
   },
 
   {

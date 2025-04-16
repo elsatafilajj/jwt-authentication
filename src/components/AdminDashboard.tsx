@@ -1,15 +1,7 @@
-import { useAuth } from "../store/auth-context";
-import { Button } from "./ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserInfo } from "@/api/api";
 
-const AdminHomepage = () => {
-  const { logout } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-  };
-
+const Dashboard = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["admin"],
     queryFn: fetchUserInfo,
@@ -27,17 +19,7 @@ const AdminHomepage = () => {
 
       <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-6 space-y-4">
         {isLoading ? (
-          <>
-            <p className="text-center text-gray-500">Loading user info...</p>
-            <div className="pt-4">
-              <Button
-                className="w-full bg-red-500 hover:bg-red-600 text-white"
-                onClick={handleLogout}
-              >
-                Log out
-              </Button>
-            </div>
-          </>
+          <p className="text-center text-gray-500">Loading user info...</p>
         ) : (
           <>
             <div className="space-y-2">
@@ -54,15 +36,6 @@ const AdminHomepage = () => {
                 {data?.role}
               </p>
             </div>
-
-            <div className="pt-4">
-              <Button
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-                onClick={handleLogout}
-              >
-                Log out
-              </Button>
-            </div>
           </>
         )}
       </div>
@@ -70,4 +43,4 @@ const AdminHomepage = () => {
   );
 };
 
-export default AdminHomepage;
+export default Dashboard;

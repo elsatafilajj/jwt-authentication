@@ -36,7 +36,7 @@ export const signup = async (user: SignupProps) => {
     const response = await axiosInstance.post("/signup", requestBody);
 
     setTokenToLocalStorage(response.data);
-    console.log(response.data);
+
     toast.success("You have been signed up successfully 🎉!");
     return response.data;
   } catch (error) {
@@ -50,10 +50,10 @@ export const login = async (user: Partial<SignupProps>) => {
     email: user.email,
     password: user.password,
   });
+
   setTokenToLocalStorage(response.data);
 
   console.log(response.data);
-  toast.success("You are logged in! 🎉");
   return response.data;
 };
 

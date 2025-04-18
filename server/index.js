@@ -70,13 +70,13 @@ const generateTokens = (email, role) => {
 };
 
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(" ")[1];
 
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) return res.sendStatus(401);
     req.user = user;
     next();
   });
@@ -212,11 +212,6 @@ app.get("/admin/data", authenticateToken, requireAdmin, async (req, res) => {
   res.json({ message: "Welcome Admin 👑. This is top-secret data." });
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
 // Logged in user
 app.get("/me", authenticateToken, async (req, res) => {
   const users = await loadUsers();
@@ -235,7 +230,6 @@ app.get("/me", authenticateToken, async (req, res) => {
 
 // Get all notes (auth required)
 app.get("/notes", authenticateToken, async (req, res) => {
-  console.log("Authenticated user:", req.user);
   const notes = await loadNotes();
   const userNotes = notes.filter((note) => note.userId === req.user.userId);
   res.json(userNotes);
@@ -243,11 +237,10 @@ app.get("/notes", authenticateToken, async (req, res) => {
 
 // Create a new note
 app.post("/notes", authenticateToken, async (req, res) => {
-  const { title, content, position } = req.body;
+  const { content, position } = req.body;
 
   const newNote = {
     id: Date.now().toString(), // Unique ID
-    title,
     content,
     position: position || { x: 0, y: 0 },
     userId: req.user.userId,
@@ -256,6 +249,8 @@ app.post("/notes", authenticateToken, async (req, res) => {
 
   const notes = await loadNotes();
   notes.push(newNote);
+  console.log("User adding note:", req.user.userId, req.body);
+
   await saveNotes(notes);
 
   res.status(201).json(newNote);
@@ -264,7 +259,7 @@ app.post("/notes", authenticateToken, async (req, res) => {
 // Update a note
 app.put("/notes/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
-  const { title, content, position } = req.body;
+  const { content, position } = req.body;
 
   const notes = await loadNotes();
   const noteIndex = notes.findIndex(
@@ -277,7 +272,6 @@ app.put("/notes/:id", authenticateToken, async (req, res) => {
 
   notes[noteIndex] = {
     ...notes[noteIndex],
-    title,
     content,
     position,
     updatedAt: new Date().toISOString(),
@@ -303,4 +297,10 @@ app.delete("/notes/:id", authenticateToken, async (req, res) => {
 
   await saveNotes(filteredNotes);
   res.json({ msg: "Note deleted" });
+});
+console.log("USERS_FILE:", USERS_FILE);
+console.log("NOTES_FILE:", NOTES_FILE);
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

@@ -4,7 +4,7 @@ import { Button } from "../components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserInfo } from "@/api/api";
 
-const Dashboard = () => {
+const AdminDashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -63,4 +63,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default AdminDashboard;

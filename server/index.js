@@ -9,7 +9,9 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
 const USERS_FILE = process.env.USERS_FILE;
+const NOTES_FILE = process.env.NOTES_FILE;
 
 app.use(
   cors({
@@ -34,6 +36,19 @@ const saveUsers = async (users) => {
   await fs.writeJson(USERS_FILE, users);
 };
 
+const loadNotes = async () => {
+  try {
+    const data = await fs.readJson(NOTES_FILE);
+    return data;
+  } catch (err) {
+    return [];
+  }
+};
+
+const saveNotes = async (notes) => {
+  await fs.writeJson(NOTES_FILE, notes);
+};
+
 // Generate JWT access and refresh tokens
 const generateTokens = (email, role) => {
   const payload = {
@@ -55,13 +70,13 @@ const generateTokens = (email, role) => {
 };
 
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.split(" ")[1];
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(401);
+    if (err) return res.sendStatus(403);
     req.user = user;
     next();
   });
@@ -216,4 +231,76 @@ app.get("/me", authenticateToken, async (req, res) => {
   const { password, refreshToken, ...safeUser } = currentUser;
 
   res.json(safeUser);
+});
+
+// Get all notes (auth required)
+app.get("/notes", authenticateToken, async (req, res) => {
+  console.log("Authenticated user:", req.user);
+  const notes = await loadNotes();
+  const userNotes = notes.filter((note) => note.userId === req.user.userId);
+  res.json(userNotes);
+});
+
+// Create a new note
+app.post("/notes", authenticateToken, async (req, res) => {
+  const { title, content, position } = req.body;
+
+  const newNote = {
+    id: Date.now().toString(), // Unique ID
+    title,
+    content,
+    position: position || { x: 0, y: 0 },
+    userId: req.user.userId,
+    createdAt: new Date().toISOString(),
+  };
+
+  const notes = await loadNotes();
+  notes.push(newNote);
+  await saveNotes(notes);
+
+  res.status(201).json(newNote);
+});
+
+// Update a note
+app.put("/notes/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { title, content, position } = req.body;
+
+  const notes = await loadNotes();
+  const noteIndex = notes.findIndex(
+    (note) => note.id === id && note.userId === req.user.userId
+  );
+
+  if (noteIndex === -1) {
+    return res.status(404).json({ msg: "Note not found" });
+  }
+
+  notes[noteIndex] = {
+    ...notes[noteIndex],
+    title,
+    content,
+    position,
+    updatedAt: new Date().toISOString(),
+  };
+
+  await saveNotes(notes);
+
+  res.json(notes[noteIndex]);
+});
+
+// Delete a note
+app.delete("/notes/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  const notes = await loadNotes();
+  const filteredNotes = notes.filter(
+    (note) => note.id !== id || note.userId !== req.user.userId
+  );
+
+  if (notes.length === filteredNotes.length) {
+    return res.status(404).json({ msg: "Note not found" });
+  }
+
+  await saveNotes(filteredNotes);
+  res.json({ msg: "Note deleted" });
 });

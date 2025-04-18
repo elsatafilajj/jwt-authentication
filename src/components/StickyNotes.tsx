@@ -1,63 +1,84 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import DraggableNote from "./DraggableNote";
 import Sidebar from "./Sidebar";
-
-type Note = {
-  id: number;
-  x: number;
-  y: number;
-  text: string;
-};
-
-type DragItem = {
-  type: string;
-  id: number;
-  x?: number;
-  y?: number;
-  text?: string;
-};
-
-let idCounter = 2;
+import {
+  createNote,
+  deleteNote,
+  fetchNotes,
+  Note,
+  updateNote,
+} from "@/api/apiNotes";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 const StickyNotes = () => {
+  const queryClient = useQueryClient();
   const dropRef = useRef<HTMLDivElement>(null);
-  const [notes, setNotes] = useState<Note[]>(() => {
-    const savedNotes = localStorage.getItem("notes");
-    return savedNotes ? JSON.parse(savedNotes) : [];
+  const [notes, setNotes] = useState<Note[]>([]);
+
+  const { data: userNotes } = useQuery({
+    queryKey: ["notes"],
+    queryFn: fetchNotes,
   });
 
-  useEffect(() => {
-    localStorage.setItem("notes", JSON.stringify(notes));
-  }, [notes]);
+  const { mutateAsync } = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      toast.success("You created a note! 🎉");
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Something went wrong!");
+    },
+  });
 
-  const moveNote = (id: number, newX: number, newY: number) => {
+  const { mutate: editNote } = useMutation({
+    mutationFn: ({
+      id,
+      updatedNote,
+    }: {
+      id: string;
+      updatedNote: Partial<Note>;
+    }) => updateNote(id, updatedNote),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      toast.success("Note is updated! 🎉");
+    },
+  });
+
+  const { mutate: removeNote } = useMutation({
+    mutationFn: (id: string) => deleteNote(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      toast.success("Note is deleted");
+    },
+  });
+
+  const moveNote = (id: string, newX: number, newY: number) => {
     setNotes((prev) =>
       prev.map((note) =>
-        note.id === id ? { ...note, x: newX, y: newY } : note
+        note.id === id ? { ...note, position: { x: newX, y: newY } } : note
       )
     );
+
+    const updatedNote = userNotes?.find((note: Note) => note.id === id);
+    if (updatedNote) {
+      editNote({
+        id: updatedNote.id,
+        updatedNote: {
+          position: { x: newX, y: newY },
+          content: updatedNote.content || "",
+        },
+      });
+    }
   };
 
-  const updateNoteText = (id: number, newText: string) => {
-    setNotes((prev) =>
-      prev.map((note) => (note.id === id ? { ...note, text: newText } : note))
-    );
-  };
-
-  const deleteNote = (id: number) => {
-    setNotes((prev) => {
-      const updatedNotes = prev.filter((note) => note.id !== id);
-
-      localStorage.setItem("notes", JSON.stringify(updatedNotes));
-      return updatedNotes;
-    });
-  };
-
-  const [, drop] = useDrop<DragItem>({
+  const [, drop] = useDrop({
     accept: "NOTE",
-    drop: (item, monitor) => {
+    drop: (item: Note, monitor) => {
       const offset = monitor.getClientOffset();
       const boundingRect = dropRef.current?.getBoundingClientRect();
 
@@ -85,13 +106,14 @@ const StickyNotes = () => {
       if (!offset || !boundingRect) return;
       const x = offset.x - boundingRect.left;
       const y = offset.y - boundingRect.top;
+
       const newNote = {
-        id: idCounter++,
-        x,
-        y,
-        text: "",
+        id: "",
+        position: { x, y },
+        title: "Untitled",
+        content: "New Note",
       };
-      setNotes((prev) => [...prev, newNote]);
+      mutateAsync(newNote as Note);
     },
   });
 
@@ -111,13 +133,25 @@ const StickyNotes = () => {
               id="canvas-area"
               className="relative bg-green-50 w-[5000px] h-[5000px] pt-16"
             >
-              {notes.map((note) => (
+              {userNotes?.map((note: Note) => (
                 <DraggableNote
                   key={note.id}
-                  note={note}
+                  note={{
+                    id: note.id,
+                    position: note.position ?? { x: 0, y: 0 },
+                    content: note.content,
+                  }}
                   moveNote={moveNote}
-                  updateNoteText={updateNoteText}
-                  deleteNote={deleteNote}
+                  updateNoteText={(id, updatedNote) =>
+                    editNote({
+                      id,
+                      updatedNote: {
+                        ...updatedNote,
+                        position: note.position,
+                      },
+                    })
+                  }
+                  deleteNote={removeNote}
                 />
               ))}
             </div>

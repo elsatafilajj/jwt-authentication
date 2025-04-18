@@ -53,6 +53,7 @@ export const login = async (user: Partial<SignupProps>) => {
   setTokenToLocalStorage(response.data);
 
   console.log(response.data);
+  toast.success("You are logged in! 🎉");
   return response.data;
 };
 

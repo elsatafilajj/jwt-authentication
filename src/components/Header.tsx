@@ -5,7 +5,7 @@ import { useAuth } from "@/store/auth-context";
 import LogoutModal from "./Modal";
 
 const Header = () => {
-  const { user, isPending } = useAuth();
+  const { user } = useAuth();
   // const navigate = useNavigate();
 
   return (
@@ -38,7 +38,7 @@ const Header = () => {
       </nav>
 
       <div className="flex items-center gap-4">
-        {!isPending && (
+        {user?.username && (
           <span className="text-sm text-gray-600 hidden sm:block">
             Hello, {user.username}
           </span>

@@ -1,5 +1,5 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("./node_modules/bcryptjs/umd");
 const jwt = require("jsonwebtoken");
 const fs = require("fs-extra");
 const dotenv = require("dotenv");

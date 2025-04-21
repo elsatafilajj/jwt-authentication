@@ -12,7 +12,7 @@ import {
 
 export type userRoleType = "admin" | "user";
 type AuthContextType = {
-  login: () => void;
+  login: (accessToken: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -60,9 +60,18 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  const login = () => {
-    setIsAuthenticated(true);
-    return true;
+  const login = (accessToken: string) => {
+    try {
+      const decoded = jwtDecode(accessToken) as decodedToken;
+
+      localStorage.setItem("accessToken", accessToken);
+      setIsAuthenticated(true);
+      setUserRole(decoded.role);
+    } catch (err) {
+      console.error("Failed to decode token:", err);
+      setIsAuthenticated(false);
+      setUserRole(null);
+    }
   };
 
   const logout = () => {

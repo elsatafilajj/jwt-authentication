@@ -15,9 +15,13 @@ const Login = () => {
 
   const { mutateAsync } = useMutation({
     mutationFn: loginApiCall,
-    onSuccess: () => {
-      login();
-      // navigate("/");
+    onSuccess: (data) => {
+      if (data?.accessToken) {
+        login(data.accessToken);
+        // navigate("/dashboard");
+      } else {
+        toast.error("Login failed: no access token received");
+      }
     },
     onError: () => {
       toast.error("Invalid email or password");

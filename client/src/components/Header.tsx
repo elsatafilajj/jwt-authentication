@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import logoImg from "../assets/logo.png";
 import { useAuth } from "../store/auth-context";
-
 import LogoutModal from "./Modal";
 
 const Header = () => {

@@ -14,8 +14,10 @@ const Signup = () => {
   const { mutateAsync } = useMutation({
     mutationFn: signup,
 
-    onSuccess: () => {
-      login();
+    onSuccess: (data) => {
+      if (data?.accesstoken) {
+        login(data.accesstoken);
+      }
       navigate("/");
     },
   });

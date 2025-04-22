@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
@@ -16,10 +16,26 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
+import { io } from "socket.io-client";
+const socket = io("http://localhost:5000");
+
 const StickyNotes = () => {
   const queryClient = useQueryClient();
   const dropRef = useRef<HTMLDivElement>(null);
   const [notes, setNotes] = useState<Note[]>([]);
+
+  useEffect(() => {
+    socket.on("note_added", (note: Note) => {
+      setNotes((prev) => [...prev, note]);
+
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      toast.info("A new note was added!");
+    });
+
+    return () => {
+      socket.off("note_added");
+    };
+  }, []);
 
   const { data: userNotes } = useQuery({
     queryKey: ["notes"],
@@ -76,6 +92,7 @@ const StickyNotes = () => {
           content: updatedNote.content || "",
         },
       });
+      socket.emit("new_note", updateNote);
     }
   };
 
@@ -114,9 +131,10 @@ const StickyNotes = () => {
         id: "",
         position: { x, y },
         title: "Untitled",
-        content: "New Note",
+        content: "",
       };
       mutateAsync(newNote as Note);
+      socket.emit("new_note", newNote);
     },
   });
 
@@ -136,27 +154,49 @@ const StickyNotes = () => {
               id="canvas-area"
               className="relative bg-green-50 w-[5000px] h-[5000px] pt-16"
             >
-              {userNotes?.map((note: Note) => (
-                <DraggableNote
-                  key={note.id}
-                  note={{
-                    id: note.id,
-                    position: note.position ?? { x: 0, y: 0 },
-                    content: note.content,
-                  }}
-                  moveNote={moveNote}
-                  updateNoteText={(id, updatedNote) =>
-                    editNote({
-                      id,
-                      updatedNote: {
-                        ...updatedNote,
-                        position: note.position,
-                      },
-                    })
-                  }
-                  deleteNote={removeNote}
-                />
-              ))}
+              {userNotes
+                ? userNotes?.map((note: Note) => (
+                    <DraggableNote
+                      key={note.id}
+                      note={{
+                        id: note.id,
+                        position: note.position ?? { x: 0, y: 0 },
+                        content: note.content,
+                      }}
+                      moveNote={moveNote}
+                      updateNoteText={(id, updatedNote) =>
+                        editNote({
+                          id,
+                          updatedNote: {
+                            ...updatedNote,
+                            position: note.position,
+                          },
+                        })
+                      }
+                      deleteNote={removeNote}
+                    />
+                  ))
+                : notes?.map((note: Note) => (
+                    <DraggableNote
+                      key={note.id}
+                      note={{
+                        id: note.id,
+                        position: note.position ?? { x: 0, y: 0 },
+                        content: note.content,
+                      }}
+                      moveNote={moveNote}
+                      updateNoteText={(id, updatedNote) =>
+                        editNote({
+                          id,
+                          updatedNote: {
+                            ...updatedNote,
+                            position: note.position,
+                          },
+                        })
+                      }
+                      deleteNote={removeNote}
+                    />
+                  ))}
             </div>
           </TransformComponent>
         </TransformWrapper>

@@ -1,25 +1,13 @@
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-import * as React from "react"
-import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
-
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-=======
 import * as React from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 
 import { cn } from "../../lib/utils";
 import { buttonVariants } from "../../components/ui/button";
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 
 function AlertDialog({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
-=======
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 }
 
 function AlertDialogTrigger({
@@ -27,23 +15,14 @@ function AlertDialogTrigger({
 }: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
   return (
     <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  )
-=======
   );
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 }
-
 function AlertDialogPortal({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
   return (
     <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  )
-=======
   );
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 }
 
 function AlertDialogOverlay({
@@ -59,13 +38,8 @@ function AlertDialogOverlay({
       )}
       {...props}
     />
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  )
-=======
   );
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 }
-
 function AlertDialogContent({
   className,
   ...props
@@ -82,13 +56,8 @@ function AlertDialogContent({
         {...props}
       />
     </AlertDialogPortal>
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  )
-=======
   );
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 }
-
 function AlertDialogHeader({
   className,
   ...props
@@ -99,13 +68,8 @@ function AlertDialogHeader({
       className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
       {...props}
     />
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  )
-=======
   );
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 }
-
 function AlertDialogFooter({
   className,
   ...props
@@ -119,11 +83,7 @@ function AlertDialogFooter({
       )}
       {...props}
     />
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  )
-=======
   );
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 }
 
 function AlertDialogTitle({
@@ -136,28 +96,7 @@ function AlertDialogTitle({
       className={cn("text-lg font-semibold", className)}
       {...props}
     />
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  )
-=======
   );
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
-}
-
-function AlertDialogDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Description>) {
-  return (
-    <AlertDialogPrimitive.Description
-      data-slot="alert-dialog-description"
-      className={cn("text-muted-foreground text-sm", className)}
-      {...props}
-    />
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  )
-=======
-  );
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 }
 
 function AlertDialogAction({
@@ -169,11 +108,7 @@ function AlertDialogAction({
       className={cn(buttonVariants(), className)}
       {...props}
     />
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  )
-=======
   );
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 }
 
 function AlertDialogCancel({
@@ -185,11 +120,7 @@ function AlertDialogCancel({
       className={cn(buttonVariants({ variant: "outline" }), className)}
       {...props}
     />
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-  )
-=======
   );
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx
 }
 
 export {
@@ -201,11 +132,6 @@ export {
   AlertDialogHeader,
   AlertDialogFooter,
   AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-<<<<<<< HEAD:src/components/ui/alert-dialog.tsx
-}
-=======
 };
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/ui/alert-dialog.tsx

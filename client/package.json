@@ -10,11 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD:package.json
-    "@radix-ui/react-alert-dialog": "^1.1.7",
-=======
     "@radix-ui/react-alert-dialog": "^1.1.10",
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/package.json
     "@radix-ui/react-slot": "^1.2.0",
     "@tailwindcss/vite": "^4.1.4",
     "@tanstack/react-query": "^5.72.0",
@@ -33,6 +29,7 @@
     "react-router-dom": "^7.5.0",
     "react-toastify": "^11.0.5",
     "react-zoom-pan-pinch": "^3.7.0",
+    "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.2.0",
     "tailwindcss": "^4.1.4",
     "tw-animate-css": "^1.2.8",

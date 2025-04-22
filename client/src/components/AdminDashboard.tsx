@@ -1,16 +1,10 @@
-<<<<<<< HEAD:src/components/AdminDashboard.tsx
-=======
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../store/auth-context";
 import { Button } from "../components/ui/button";
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/AdminDashboard.tsx
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserInfo } from "../api/api";
 
-<<<<<<< HEAD:src/components/AdminDashboard.tsx
-const Dashboard = () => {
-=======
 const AdminDashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -20,7 +14,6 @@ const AdminDashboard = () => {
     navigate("/login");
   };
 
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/AdminDashboard.tsx
   const { data, isLoading } = useQuery({
     queryKey: ["admin"],
     queryFn: fetchUserInfo,
@@ -54,6 +47,15 @@ const AdminDashboard = () => {
                 <span className="font-semibold text-gray-700">Role:</span>{" "}
                 {data?.role}
               </p>
+            </div>
+
+            <div className="pt-4">
+              <Button
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                onClick={handleLogout}
+              >
+                Log out
+              </Button>
             </div>
           </>
         )}

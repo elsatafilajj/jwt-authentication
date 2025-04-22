@@ -1,7 +1,7 @@
 import React from "react";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import LogoImg from "../assets/logo.png";
+
 import { useMutation } from "@tanstack/react-query";
 import { login as loginApiCall } from "../api/api";
 import { toast } from "react-toastify";
@@ -28,10 +28,6 @@ const Login = () => {
     },
   });
 
-  // if (isPending) {
-  //   return <p>Loading...</p>;
-  // }
-
   const validationSchema = Yup.object({
     email: Yup.string()
       .email("Invalid email address")
@@ -50,7 +46,11 @@ const Login = () => {
               href="#"
               className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
             >
-              <img className="w-auto h-6 mr-2" src={LogoImg} alt="logo" />
+              <img
+                className="w-auto h-6 mr-2"
+                src="../../../public/logo.png"
+                alt="logo"
+              />
             </a>
             <h1 className="text-xl font-bold leading-tight tracking-tight text-green-900 md:text-2xl">
               Log in

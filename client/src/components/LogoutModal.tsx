@@ -1,3 +1,4 @@
+import React from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -7,8 +8,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useAuth } from "@/store/auth-context";
+} from "../components/ui/alert-dialog";
+import { useAuth } from "../store/auth-context";
+import { AlertDialogDescription } from "@radix-ui/react-alert-dialog";
 
 const LogoutModal = () => {
   const { logout } = useAuth();
@@ -23,6 +25,7 @@ const LogoutModal = () => {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogDescription></AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel className="text-green-700">No</AlertDialogCancel>

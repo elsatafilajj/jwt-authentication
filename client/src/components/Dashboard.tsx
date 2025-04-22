@@ -1,10 +1,3 @@
-<<<<<<< HEAD:src/components/Dashboard.tsx
-import { Link } from "react-router-dom";
-import { useAuth } from "../store/auth-context";
-
-const Dashboard = () => {
-  const { user, isDataLoading } = useAuth();
-=======
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -16,7 +9,6 @@ const Dashboard = () => {
     queryKey: ["user"],
     queryFn: fetchUserInfo,
   });
->>>>>>> a20551e096627d8583b5e67f71b2748b8bd5385e:client/src/components/Dashboard.tsx
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
@@ -25,22 +17,22 @@ const Dashboard = () => {
       </h2>
 
       <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-6 space-y-4">
-        {isDataLoading ? (
+        {isLoading ? (
           <p className="text-center text-gray-500">Loading user info...</p>
         ) : (
           <>
             <div className="space-y-2">
               <p>
                 <span className="font-semibold text-gray-700">Email:</span>{" "}
-                {user?.email}
+                {data?.email}
               </p>
               <p>
                 <span className="font-semibold text-gray-700">Username:</span>{" "}
-                {user?.username}
+                {data?.username}
               </p>
               <p>
                 <span className="font-semibold text-gray-700">Role:</span>{" "}
-                {user?.role}
+                {data?.role}
               </p>
             </div>
           </>

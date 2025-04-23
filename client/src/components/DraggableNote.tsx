@@ -28,7 +28,13 @@ const DraggableNote = ({
   const debouncedSave = useRef(
     debounce((newContent: string) => {
       if (newContent !== note.content) {
-        updateNoteText(note.id, { content: newContent });
+        updateNoteText(note.id, {
+          content: newContent,
+          position: {
+            x: dragRef.current?.offsetLeft ?? note.position.x,
+            y: dragRef.current?.offsetTop ?? note.position.y,
+          },
+        });
       }
     }, 1000)
   ).current;
@@ -44,11 +50,15 @@ const DraggableNote = ({
     end: (item, monitor) => {
       const delta = monitor.getDifferenceFromInitialOffset();
       if (delta) {
-        const newX = item.position.x + delta.x;
-        const newY = item.position.y + delta.y;
+        const { x: dx, y: dy } = delta;
+
+        const newX = item.position.x + dx;
+        const newY = item.position.y + dy;
+
         moveNote(item.id, newX, newY);
       }
     },
+
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -65,10 +75,11 @@ const DraggableNote = ({
       ref={dragRef}
       className={`absolute ${
         isDragging ? "opacity-50" : "opacity-100"
-      } bg-green-200 p-4 rounded-lg shadow-lg w-[300px] h-[300px] cursor-${
+      } bg-green-200 p-4  w-[270px] h-[270px] cursor-${
         isEditing ? "text" : "move"
       } transition-all`}
       style={{
+        position: "absolute",
         left: note.position.x,
         top: note.position.y,
       }}

@@ -1,7 +1,6 @@
 import React from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import LogoImg from "../assets/logo.png";
 import { useMutation } from "@tanstack/react-query";
 import { signup } from "../api/api";
 import { Link, useNavigate } from "react-router-dom";
@@ -51,7 +50,7 @@ const Signup = () => {
               href="#"
               className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
             >
-              <img className="w-auto h-6  mr-2" src={LogoImg} alt="logo" />
+              <img className="w-auto h-6  mr-2" src="/logo.png" alt="logo" />
             </a>
             <h1 className="text-xl font-bold leading-tight tracking-tight text-green-900 md:text-2xl">
               Create an account

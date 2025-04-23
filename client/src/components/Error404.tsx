@@ -1,12 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import bckImage from "../assets/pexels-jobzky-8022728.jpg";
 
 const Error404 = () => {
   return (
     <div
       className="min-h-screen flex flex-col justify-center items-center bg-cover bg-center text-center px-4"
-      style={{ backgroundImage: `url(${bckImage})` }}
+      style={{
+        backgroundImage: 'url("../../public/pexels-jobzky-8022728.jpg")',
+      }}
     >
       <div className="bg-[#b0974c] bg-opacity-60 p-8 rounded-xl text-white">
         <h3 className="text-xl font-semibold ">ERROR</h3>

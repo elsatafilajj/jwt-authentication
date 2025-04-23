@@ -19,7 +19,7 @@ import { toast } from "react-toastify";
 const StickyNotes = () => {
   const queryClient = useQueryClient();
   const dropRef = useRef<HTMLDivElement>(null);
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [, setNotes] = useState<Note[]>([]);
 
   const { data: userNotes } = useQuery({
     queryKey: ["notes"],
@@ -87,8 +87,15 @@ const StickyNotes = () => {
 
       if (!offset || !boundingRect) return;
 
-      const x = offset.x - boundingRect.left;
-      const y = offset.y - boundingRect.top;
+      let state;
+
+      const { scale, positionX, positionY } = state;
+
+      const rawX = offset.x - boundingRect.left;
+      const rawY = offset.y - boundingRect.top;
+
+      const x = (rawX - positionX) / scale;
+      const y = (rawY - positionY) / scale;
 
       moveNote(item.id, x, y);
     },
@@ -114,7 +121,7 @@ const StickyNotes = () => {
         id: "",
         position: { x, y },
         title: "Untitled",
-        content: "New Note",
+        content: "",
       };
       mutateAsync(newNote as Note);
     },
@@ -130,11 +137,12 @@ const StickyNotes = () => {
       <div className="flex flex-1">
         <Sidebar />
         <TransformWrapper>
+          {/* {({ state }) => ( */}
           <TransformComponent>
             <div
               ref={dropRef}
               id="canvas-area"
-              className="relative bg-green-50 w-[5000px] h-[5000px] pt-16"
+              className="relative bg-green-50 w-[50000px] h-[50000px] pt-16"
             >
               {userNotes?.map((note: Note) => (
                 <DraggableNote
@@ -148,10 +156,7 @@ const StickyNotes = () => {
                   updateNoteText={(id, updatedNote) =>
                     editNote({
                       id,
-                      updatedNote: {
-                        ...updatedNote,
-                        position: note.position,
-                      },
+                      updatedNote,
                     })
                   }
                   deleteNote={removeNote}
@@ -159,6 +164,7 @@ const StickyNotes = () => {
               ))}
             </div>
           </TransformComponent>
+          {/* )} */}
         </TransformWrapper>
       </div>
     </div>

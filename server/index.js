@@ -272,10 +272,18 @@ app.put("/notes/:id", authenticateToken, async (req, res) => {
 
   notes[noteIndex] = {
     ...notes[noteIndex],
-    content,
-    position,
+    content: content ?? notes[noteIndex].content,
+    position: position ?? notes[noteIndex].position,
     updatedAt: new Date().toISOString(),
   };
+
+  if (content !== undefined) {
+    notes[noteIndex].content = content;
+  }
+  if (position !== undefined) {
+    notes[noteIndex].position = position;
+  }
+  notes[noteIndex].updatedAt = new Date().toISOString();
 
   await saveNotes(notes);
 

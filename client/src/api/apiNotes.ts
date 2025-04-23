@@ -10,6 +10,7 @@ export type Note = {
   title: string;
   content: string;
   position: Position;
+  userId?: string;
 };
 
 export const fetchNotes = async () => {

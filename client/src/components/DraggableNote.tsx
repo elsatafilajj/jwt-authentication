@@ -9,6 +9,7 @@ interface DraggableNoteProps {
   moveNote: (id: string, newX: number, newY: number) => void;
   updateNoteText: (id: string, updatedNote: Partial<Note>) => void;
   deleteNote: (id: string) => void;
+  isLocked: boolean;
 }
 
 const DraggableNote = ({
@@ -16,6 +17,7 @@ const DraggableNote = ({
   moveNote,
   updateNoteText,
   deleteNote,
+  isLocked,
 }: DraggableNoteProps) => {
   const dragRef = useRef<HTMLDivElement>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -28,7 +30,13 @@ const DraggableNote = ({
   const debouncedSave = useRef(
     debounce((newContent: string) => {
       if (newContent !== note.content) {
-        updateNoteText(note.id, { content: newContent });
+        updateNoteText(note.id, {
+          content: newContent,
+          position: {
+            x: dragRef.current?.offsetLeft ?? note.position.x,
+            y: dragRef.current?.offsetTop ?? note.position.y,
+          },
+        });
       }
     }, 1000)
   ).current;
@@ -39,16 +47,20 @@ const DraggableNote = ({
 
   const [{ isDragging }, drag] = useDrag({
     type: "NOTE",
-    canDrag: !isEditing,
+    canDrag: !isEditing && !isLocked,
     item: { ...note, type: "NOTE" },
     end: (item, monitor) => {
       const delta = monitor.getDifferenceFromInitialOffset();
       if (delta) {
-        const newX = item.position.x + delta.x;
-        const newY = item.position.y + delta.y;
+        const { x: dx, y: dy } = delta;
+
+        const newX = item.position.x + dx;
+        const newY = item.position.y + dy;
+
         moveNote(item.id, newX, newY);
       }
     },
+
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -65,37 +77,51 @@ const DraggableNote = ({
       ref={dragRef}
       className={`absolute ${
         isDragging ? "opacity-50" : "opacity-100"
-      } bg-green-200 p-4 rounded-lg shadow-lg w-[300px] h-[300px] cursor-${
-        isEditing ? "text" : "move"
-      } transition-all`}
+      }  p-4  w-[270px] h-[270px] cursor-${isEditing ? "text" : "move"} 
+      ${isLocked ? " bg-green-200 " : "bg-green-300"}  
+      transition-all`}
       style={{
+        position: "absolute",
         left: note.position.x,
         top: note.position.y,
       }}
       onClick={() => setIsEditing(true)}
       onMouseDown={stopPropagation}
     >
-      {isEditing ? (
+      {!isLocked && isEditing ? (
         <div>
           <textarea
             autoFocus
-            placeholder="Type anything, @mention anyone"
             value={localContent}
             onChange={(e) => setLocalContent(e.target.value)}
             onBlur={() => setIsEditing(false)}
-            className="w-full h-full resize-none border-none outline-none bg-transparent text-sm text-green-800"
+            className="w-full h-full resize-none border-none outline-none bg-transparent text-sm text-green-800 "
+            disabled={isLocked}
           />
         </div>
       ) : (
-        <div className="text-green-800">{note.content}</div>
+        <div>
+          <textarea
+            placeholder={!isLocked ? "Type anything, @mention anyone" : ""}
+            className="w-full h-full resize-none border-none outline-none bg-transparent text-sm text-green-800 "
+            disabled={isLocked}
+            defaultValue={note.content}
+          />
+        </div>
       )}
 
-      <button
-        onClick={() => deleteNote(note.id)}
-        className="absolute top-2 right-2 text-green-600 hover:text-green-700 rounded-full p-1 hover:bg-green-100 transition-all"
-      >
-        X
-      </button>
+      {!isLocked ? (
+        <button
+          onClick={() => deleteNote(note.id)}
+          className="absolute top-2 right-2 text-green-600 hover:text-green-700 rounded-full p-1 hover:bg-green-100 transition-all"
+        >
+          X
+        </button>
+      ) : (
+        <button className="absolute top-2 right-2 text-green-600 hover:text-green-700 rounded-full p-1 hover:bg-green-100 transition-all">
+          ✓
+        </button>
+      )}
     </div>
   );
 };

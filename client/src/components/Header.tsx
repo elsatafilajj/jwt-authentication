@@ -1,16 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
+
 import { useAuth } from "../store/auth-context";
 import LogoutModal from "./Modal";
-import { Button } from "./ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNote } from "../api/apiNotes";
 import { toast } from "react-toastify";
 
 const Header = () => {
   const { user, isLoading } = useAuth();
-
   const queryClient = useQueryClient();
+
+  // const navigate = useNavigate();
 
   const { mutateAsync } = useMutation({
     mutationFn: createNote,
@@ -24,20 +25,21 @@ const Header = () => {
     },
   });
 
-  const handleCreateNewNote = () => {
-    mutateAsync({
+  const handleClickCreateNote = () => {
+    const newNote = {
       id: "",
-      position: { x: 0, y: 0 },
-      title: "Untitled",
+      title: "",
       content: "",
-    });
+      position: { x: 0, y: 0 },
+    };
+    mutateAsync(newNote);
   };
 
   return (
     <header className="w-full h-16 px-6 bg-white shadow-md flex items-center justify-between fixed top-0 left-0 z-50">
       <div className="flex items-center gap-3">
         <Link to="/" className="text-xl font-semibold text-gray-800">
-          <img src="/logo.png" alt="Logo" className="h-8 w-full" />
+          <img src="/logo.png" alt="Logo" className="h-8 w-[100px]" />
         </Link>
       </div>
 
@@ -54,12 +56,12 @@ const Header = () => {
         >
           Notes
         </Link>
-        <Button
-          onClick={handleCreateNewNote}
+        <button
+          onClick={handleClickCreateNote}
           className="bg-green-600 text-white px-4 py-1.5 rounded-full font-semibold hover:bg-green-700 transition"
         >
           + New
-        </Button>
+        </button>
       </nav>
 
       <div className="flex items-center gap-4">

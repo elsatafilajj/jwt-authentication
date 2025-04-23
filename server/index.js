@@ -231,8 +231,8 @@ app.get("/me", authenticateToken, async (req, res) => {
 // Get all notes (auth required)
 app.get("/notes", authenticateToken, async (req, res) => {
   const notes = await loadNotes();
-  const userNotes = notes.filter((note) => note.userId === req.user.userId);
-  res.json(userNotes);
+  // const userNotes = notes.filter((note) => note.userId === req.user.userId);
+  res.json(notes);
 });
 
 // Create a new note
@@ -308,7 +308,70 @@ app.delete("/notes/:id", authenticateToken, async (req, res) => {
 });
 console.log("USERS_FILE:", USERS_FILE);
 console.log("NOTES_FILE:", NOTES_FILE);
+
 // Start the server
-app.listen(PORT, () => {
+const http = require("http");
+const { Server } = require("socket.io");
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173", // Your frontend origin
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  // Listen for note updates from client
+  socket.on("note-updated", (updatedNote) => {
+    if (updatedNote) {
+      console.log("Note updated:", updatedNote);
+      io.emit("note-updated", updatedNote); // Broadcast the update to all clients
+    } else {
+      console.error("Error: Missing updated note data.");
+    }
+  });
+
+  // Handle note creation
+  socket.on("new-note", async (newNote) => {
+    const notes = await loadNotes();
+    if (newNote) {
+      console.log("new-note:", newNote);
+      io.emit("note-created", newNote); // Broadcast the new note to all clients
+      await saveNotes(notes);
+    } else {
+      console.error("Error: Missing new note data.");
+    }
+  });
+
+  // Handle note deletion
+  socket.on("note-deleted", (deletedNoteId) => {
+    if (deletedNoteId) {
+      console.log("Note deleted:", deletedNoteId);
+      io.emit("note-deleted", { id: deletedNoteId });
+      // Broadcast the deleted note ID to all clients
+    } else {
+      console.error("Error: Missing deleted note ID.");
+    }
+  });
+
+  // Handle note movement
+  socket.on("note-moved", (note) => {
+    if (note) {
+      console.log("Note moved:", note);
+      io.emit("note-moved", note); // Broadcast the movement to all clients
+    } else {
+      console.error("Error: Missing note movement data.");
+    }
+  });
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.id);
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

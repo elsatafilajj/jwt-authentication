@@ -1,17 +1,27 @@
 const express = require("express");
-const bcrypt = require("./node_modules/bcryptjs/umd");
+// const bcrypt = require("./node_modules/bcryptjs/umd");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs-extra");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const { Server } = require("socket.io");
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const USERS_FILE = process.env.USERS_FILE;
-const NOTES_FILE = process.env.NOTES_FILE;
+const http = require("http").createServer(app);
+const io = new Server(http, {
+  cors: {
+    origin: "http://localhost:5173",
+  },
+});
+
+const path = require("path");
+const USERS_FILE = path.resolve(process.env.USERS_FILE);
+const NOTES_FILE = path.resolve(process.env.NOTES_FILE);
 
 app.use(
   cors({
@@ -39,6 +49,7 @@ const saveUsers = async (users) => {
 const loadNotes = async () => {
   try {
     const data = await fs.readJson(NOTES_FILE);
+    console.log(data);
     return data;
   } catch (err) {
     return [];
@@ -231,7 +242,9 @@ app.get("/me", authenticateToken, async (req, res) => {
 // Get all notes (auth required)
 app.get("/notes", authenticateToken, async (req, res) => {
   const notes = await loadNotes();
-  const userNotes = notes.filter((note) => note.userId === req.user.userId);
+  console.log(notes);
+
+  const userNotes = notes.filter((note) => note?.userId === req.user.userId);
   res.json(userNotes);
 });
 
@@ -249,7 +262,7 @@ app.post("/notes", authenticateToken, async (req, res) => {
 
   const notes = await loadNotes();
   notes.push(newNote);
-  console.log("User adding note:", req.user.userId, req.body);
+  console.log("User adding note:", req.user?.userId, req.body);
 
   await saveNotes(notes);
 
@@ -301,6 +314,38 @@ app.delete("/notes/:id", authenticateToken, async (req, res) => {
 console.log("USERS_FILE:", USERS_FILE);
 console.log("NOTES_FILE:", NOTES_FILE);
 // Start the server
-app.listen(PORT, () => {
+http.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+/* WEBSOCKET FUNCTIONS */
+
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  // socket.on("new_note", async (note) => {
+  //   const notes = await loadNotes();
+  //   notes.push(note);
+  //   await saveNotes(notes);
+  //   io.emit("note_added", note);
+  // });
+
+  /* TO BE IMPLEMENTED */
+  // socket.on("updated_note", async (note) => {
+  //   const notes = await loadNotes();
+  //   notes.push(note);
+  //   await saveNotes(notes);
+  //   io.emit("note_updated", note);
+  // });
+
+  // socket.on("moved_note", async (note) => {
+  //   const notes = await loadNotes();
+  //   notes.push(note);
+  //   await saveNotes(notes);
+  //   io.emit("note_moved", note);
+  // });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
 });

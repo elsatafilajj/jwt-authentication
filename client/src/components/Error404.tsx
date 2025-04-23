@@ -5,7 +5,7 @@ const Error404 = () => {
   return (
     <div
       className="min-h-screen flex flex-col justify-center items-center bg-cover bg-center text-center px-4"
-      style={{ backgroundImage: `url(../../../public/bg-image.jpg)` }}
+      style={{ backgroundImage: `url(/bg-image.jpg)` }}
     >
       <div className="bg-[#b0974c] bg-opacity-60 p-8 rounded-xl text-white">
         <h3 className="text-xl font-semibold ">ERROR</h3>

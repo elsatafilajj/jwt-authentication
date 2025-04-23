@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+// import React, { useEffect } from "react";
+import React from "react";
 import { useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
@@ -16,26 +17,26 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-import { io } from "socket.io-client";
-const socket = io("http://localhost:5000");
+// import { io } from "socket.io-client";
+// const socket = io("http://localhost:5000");
 
 const StickyNotes = () => {
   const queryClient = useQueryClient();
   const dropRef = useRef<HTMLDivElement>(null);
   const [notes, setNotes] = useState<Note[]>([]);
 
-  useEffect(() => {
-    socket.on("note_added", (note: Note) => {
-      setNotes((prev) => [...prev, note]);
+  // useEffect(() => {
+  //   socket.on("note_added", (note: Note) => {
+  //     setNotes((prev) => [...prev, note]);
 
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      toast.info("A new note was added!");
-    });
+  //     queryClient.invalidateQueries({ queryKey: ["notes"] });
+  //     toast.info("A new note was added!");
+  //   });
 
-    return () => {
-      socket.off("note_added");
-    };
-  }, []);
+  //   return () => {
+  //     socket.off("note_added");
+  //   };
+  // }, []);
 
   const { data: userNotes } = useQuery({
     queryKey: ["notes"],
@@ -92,7 +93,7 @@ const StickyNotes = () => {
           content: updatedNote.content || "",
         },
       });
-      socket.emit("new_note", updateNote);
+      // socket.emit("new_note", updateNote);
     }
   };
 
@@ -134,7 +135,7 @@ const StickyNotes = () => {
         content: "",
       };
       mutateAsync(newNote as Note);
-      socket.emit("new_note", newNote);
+      // socket.emit("new_note", newNote);
     },
   });
 

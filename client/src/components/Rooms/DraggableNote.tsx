@@ -1,5 +1,5 @@
 import React from "react";
-import { Note } from "../api/apiNotes";
+import { Note } from "../../api/apiNotes";
 import { useEffect, useRef, useState } from "react";
 import debounce from "lodash.debounce";
 import { useDrag } from "react-dnd";

@@ -5,14 +5,14 @@ import { RouteNames } from "../constants/RouteNames";
 import { AuthLayout } from "../layout/AuthLayout";
 import { MainLayout } from "../layout/MainLayout";
 
-import Login from "../components/Login";
-import Signup from "../components/Signup";
-import Dashboard from "../components/Dashboard";
-import Error404 from "../components/Error404";
-import AdminDashboard from "../components/AdminDashboard";
+import Login from "../components/Authentication/Login";
+import Signup from "../components/Authentication/Signup";
+import Dashboard from "../components/Rooms/Dashboard";
+import Error404 from "../components/Error/Error404";
+import AdminDashboard from "../components/Rooms/AdminDashboard";
+import StickyNotes from "../components/Rooms/StickyNotes";
 
 import { AdminLayout } from "../layout/AdminLayout";
-import StickyNotes from "../components/StickyNotes";
 
 export const appRoutes: RouteObject[] = [
   {

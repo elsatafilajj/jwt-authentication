@@ -12,12 +12,31 @@ const PORT = process.env.PORT || 5000;
 
 const USERS_FILE = process.env.USERS_FILE;
 const NOTES_FILE = process.env.NOTES_FILE;
+const ROOMS_FILE = process.env.ROOMS_FILE;
 
 app.use(
   cors({
     origin: "http://localhost:5173",
   })
 );
+
+// Load rooms from file
+const loadRooms = async () => {
+  try {
+    const data = await fs.readJson(ROOMS_FILE);
+    return data;
+  } catch (err) {
+    return {}; // Return an empty object if the file doesn't exist or is empty
+  }
+};
+
+let rooms = {};
+
+const initializeRooms = async () => {
+  rooms = await loadRooms();
+};
+
+initializeRooms();
 
 app.use(express.json());
 
@@ -47,6 +66,27 @@ const loadNotes = async () => {
 
 const saveNotes = async (notes) => {
   await fs.writeJson(NOTES_FILE, notes);
+};
+
+// Save rooms to file
+const saveRooms = async (rooms) => {
+  await fs.writeJson(ROOMS_FILE, rooms);
+};
+
+const requireAuth = async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Get token from Authorization header
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Decode the token
+    req.user = decoded; // Assuming decoded contains user info like userId
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
 };
 
 // Generate JWT access and refresh tokens
@@ -309,6 +349,114 @@ app.delete("/notes/:id", authenticateToken, async (req, res) => {
 console.log("USERS_FILE:", USERS_FILE);
 console.log("NOTES_FILE:", NOTES_FILE);
 
+// GET all rooms (admin only access for all rooms)
+app.get("/rooms", requireAuth, async (req, res) => {
+  const rooms = await loadRooms();
+  res.status(200).json(rooms);
+});
+
+app.get("/my-rooms", requireAuth, async (req, res) => {
+  const { userId } = req.user;
+  console.log("user id ", userId);
+
+  if (!userId) {
+    return res.status(400).json({ message: "User not found" });
+  }
+
+  const rooms = await loadRooms();
+  console.log("All rooms:", rooms);
+
+  // Filter the rooms where the current user is the host
+  const userRooms = rooms.filter((room) => room.host === userId);
+  console.log("user rooms", userRooms);
+
+  if (userRooms.length === 0) {
+    return res.status(404).json({ message: "No rooms found for this user" });
+  }
+
+  res.status(200).json(userRooms);
+});
+
+// Create room endpoint
+app.post("/rooms", requireAuth, async (req, res) => {
+  const { name, host } = req.body;
+
+  // Generate a unique room ID (you can use a library or create your own)
+  const roomId = `roomId${Date.now()}`;
+
+  // Create the new room object
+  const newRoom = {
+    id: roomId,
+    name,
+    host,
+    participants: [host], // Assuming host is part of the room
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  // Add the new room to the in-memory rooms object
+  rooms.push(newRoom);
+
+  // Save the updated rooms to the file
+  await saveRooms(rooms);
+
+  res.status(201).json(newRoom);
+});
+
+app.post("/rooms/:roomId/join", requireAuth, async (req, res) => {
+  const { roomId } = req.params;
+  const { userId } = req.user;
+
+  // Find the room by its ID
+  const room = rooms.find((r) => r.id === roomId);
+
+  if (!room) {
+    return res.status(404).json({ message: "Room not found" });
+  }
+
+  // Check if the user is already in the room
+  if (room.participants.includes(userId)) {
+    return res.status(400).json({ message: "User is already in the room" });
+  }
+
+  // Add the user to the participants list
+  room.participants.push(userId);
+  room.updatedAt = new Date().toISOString();
+
+  // Save the updated rooms to the file
+  await saveRooms(rooms);
+
+  res.status(200).json(room);
+});
+
+app.delete("/rooms/:roomId", requireAuth, async (req, res) => {
+  const { roomId } = req.params;
+  const { userId } = req.user;
+  // Find the room by its ID
+  const room = rooms.find((r) => r.id === roomId);
+
+  if (!room) {
+    return res.status(404).json({ message: "Room not found" });
+  }
+
+  // Check if the user is the host or an admin
+  if (room.host !== userId && !userIsAdmin(userId)) {
+    return res
+      .status(403)
+      .json({ message: "You are not authorized to delete this room" });
+  }
+
+  // Find and remove the room by its ID
+  const roomIndex = rooms.findIndex((r) => r.id === roomId);
+  // Remove the room from the in-memory array
+  rooms.splice(roomIndex, 1);
+
+  // Save the updated rooms to the file
+  await saveRooms(rooms);
+
+  res.status(200).json({ message: "Room deleted successfully" });
+});
+
 // Start the server
 const http = require("http");
 const { Server } = require("socket.io");
@@ -324,6 +472,29 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
+
+  // Handle room join
+  socket.on("join-room", (roomId) => {
+    const room = rooms[roomId];
+    if (room) {
+      // Add user to room
+      room.participants.push(socket.id);
+      socket.join(roomId);
+
+      console.log(`User ${socket.id} joined room ${roomId}`);
+      socket.to(roomId).emit("user-joined", socket.id);
+      socket.emit("room-data", room);
+
+      // Save rooms to file after the update
+      saveRooms(rooms);
+    }
+  });
+
+  // Handle room messages
+  socket.on("send-message", (roomId, message) => {
+    socket.to(roomId).emit("receive-message", message);
+    console.log(`Message sent to room ${roomId}: ${message}`);
+  });
 
   // Listen for note updates from client
   socket.on("note-updated", (updatedNote) => {
@@ -367,8 +538,19 @@ io.on("connection", (socket) => {
       console.error("Error: Missing note movement data.");
     }
   });
+  // Handle user disconnect
   socket.on("disconnect", () => {
-    console.log("A user disconnected:", socket.id);
+    // Find and remove user from all rooms they are part of
+    for (const roomId in rooms) {
+      const room = rooms[roomId];
+      const index = room.participants.indexOf(socket.id);
+      if (index !== -1) {
+        room.participants.splice(index, 1);
+        socket.to(roomId).emit("user-left", socket.id);
+        console.log(`User ${socket.id} left room ${roomId}`);
+      }
+    }
+    saveRooms(rooms);
   });
 });
 

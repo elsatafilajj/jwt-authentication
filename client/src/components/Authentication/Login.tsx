@@ -1,23 +1,21 @@
 import React from "react";
 import * as Yup from "yup";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form } from "formik";
 import { useMutation } from "@tanstack/react-query";
-import { login as loginApiCall } from "../api/api";
+import { login as loginApiCall } from "../../api/api";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import { useAuth } from "../store/auth-context";
+import { useAuth } from "../../store/auth-context";
+import { Input } from "../ui/input";
 
 const Login = () => {
   const { login } = useAuth();
-
-  // const navigate = useNavigate();
 
   const { mutateAsync } = useMutation({
     mutationFn: loginApiCall,
     onSuccess: (data) => {
       if (data?.accessToken) {
         login(data.accessToken);
-        // navigate("/dashboard");
       } else {
         toast.error("Login failed: no access token received");
       }
@@ -26,10 +24,6 @@ const Login = () => {
       toast.error("Invalid email or password");
     },
   });
-
-  // if (isPending) {
-  //   return <p>Loading...</p>;
-  // }
 
   const validationSchema = Yup.object({
     email: Yup.string()
@@ -66,51 +60,21 @@ const Login = () => {
             >
               <Form className="space-y-4 md:space-y-6" action="#">
                 {/* Email */}
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block mb-2 text-sm font-medium text-green-900"
-                  >
-                    Your email
-                  </label>
-                  <Field
-                    type="email"
-                    name="email"
-                    id="email"
-                    className="bg-green-100 border border-green-300 text-green-900 placeholder-green-600 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
-                    placeholder="name@company.com"
-                    required
-                  />
-                  <ErrorMessage
-                    name="email"
-                    component="div"
-                    className="text-sm text-red-500"
-                  />
-                </div>
-
+                <Input
+                  label="Your email"
+                  type="email"
+                  name="email"
+                  placeholder="name@company.com"
+                  required
+                />
                 {/* Password */}
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="block mb-2 text-sm font-medium text-green-900"
-                  >
-                    Password
-                  </label>
-                  <Field
-                    type="password"
-                    name="password"
-                    id="password"
-                    placeholder="••••••••"
-                    className="bg-green-100 border border-green-300 text-green-900 placeholder-green-600 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
-                    required
-                  />
-                  <ErrorMessage
-                    name="password"
-                    component="div"
-                    className="text-sm text-red-500"
-                  />
-                </div>
-
+                <Input
+                  label="Your password"
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  required
+                />
                 {/* Submit Button */}
                 <button
                   type="submit"

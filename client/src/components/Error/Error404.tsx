@@ -6,7 +6,7 @@ const Error404 = () => {
     <div
       className="min-h-screen flex flex-col justify-center items-center bg-cover bg-center text-center px-4"
       style={{
-        backgroundImage: 'url("../../public/pexels-jobzky-8022728.jpg")',
+        backgroundImage: 'url("/pexels-jobzky-8022728.jpg")',
       }}
     >
       <div className="bg-[#b0974c] bg-opacity-60 p-8 rounded-xl text-white">

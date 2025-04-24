@@ -1,19 +1,32 @@
 import React from "react";
-import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../store/auth-context";
+import { Button } from "../ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { fetchUserInfo } from "../api/api";
+import { fetchUserInfo } from "../../api/api";
 
-const Dashboard = () => {
+const AdminDashboard = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   const { data, isLoading } = useQuery({
-    queryKey: ["user"],
+    queryKey: ["admin"],
     queryFn: fetchUserInfo,
   });
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
       <h2 className="text-4xl font-bold mb-6 text-gray-800">
-        Welcome to Your Dashboard
+        Welcome to Your AdminDashboard
       </h2>
 
       <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-6 space-y-4">
@@ -35,17 +48,20 @@ const Dashboard = () => {
                 {data?.role}
               </p>
             </div>
+
+            <div className="pt-4">
+              <Button
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                onClick={handleLogout}
+              >
+                Log out
+              </Button>
+            </div>
           </>
         )}
       </div>
-      <Link
-        to="/stickyNotes"
-        className="px-5 mt-5 py-2 rounded-full bg-green-600 hover:bg-green-700 transition duration-300 text-white"
-      >
-        Go to your projects
-      </Link>
     </div>
   );
 };
 
-export default Dashboard;
+export default AdminDashboard;

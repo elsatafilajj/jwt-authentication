@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useDrop } from "react-dnd";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import DraggableNote from "./DraggableNote";
-import Sidebar from "./Sidebar";
-import { useSocket } from "../store/socket-context";
+import Sidebar from "../Layout/Sidebar";
+import { useSocket } from "../../store/socket-context";
 
 import {
   createNote,
@@ -12,17 +12,16 @@ import {
   fetchNotes,
   Note,
   updateNote,
-} from "../api/apiNotes";
+} from "../../api/apiNotes";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { useAuth } from "../store/auth-context";
-import { SocketEvents } from "../types/socketEvents";
+import { useAuth } from "../../store/auth-context";
+import { SocketEvents } from "../../types/socketEvents";
 
 const StickyNotes = () => {
   const queryClient = useQueryClient();
   const dropRef = useRef<HTMLDivElement>(null);
-  const [, setNotes] = useState<Note[]>([]);
   const socket = useSocket();
   const { user, isPending } = useAuth();
 
@@ -37,7 +36,7 @@ const StickyNotes = () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("You created a note! 🎉");
 
-      socket?.emit("note-created", data);
+      socket?.emit(SocketEvents.NoteCreated, data);
     },
     onError: (error) => {
       console.error(error);
@@ -57,7 +56,7 @@ const StickyNotes = () => {
     onSuccess: (variables) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("Note updated! 🎉");
-      socket?.emit("note-updated", variables);
+      socket?.emit(SocketEvents.NoteUpdated, variables);
     },
   });
 
@@ -66,7 +65,7 @@ const StickyNotes = () => {
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("Note deleted!");
-      socket?.emit("note-deleted", id);
+      socket?.emit(SocketEvents.NoteDeleted, id);
     },
   });
 
@@ -139,36 +138,36 @@ const StickyNotes = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("note-created", (newNote) => {
+    socket.on(SocketEvents.NoteCreated, (newNote) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.refetchQueries({ queryKey: ["notes"] });
       // toast.success("New note added by another user!");
       console.log(newNote);
     });
 
-    socket.on("note-updated", (updatedNote) => {
+    socket.on(SocketEvents.NoteUpdated, (updatedNote) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       // toast.success("A note was updated by another user!");
       console.log(updatedNote);
     });
 
-    socket.on("note-deleted", (noteId) => {
+    socket.on(SocketEvents.NoteDeleted, (noteId) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       // toast.success("A note was deleted by another user!");
       console.log(noteId);
     });
 
-    socket.on("note-moved", (updatedNote) => {
+    socket.on(SocketEvents.NoteMoved, (updatedNote) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       // toast.success("A note was moved by another user!");
       console.log(updatedNote);
     });
 
     return () => {
-      socket.off("note-created");
-      socket.off("note-updated");
-      socket.off("note-deleted");
-      socket.off("note-moved");
+      socket.off(SocketEvents.NoteCreated);
+      socket.off(SocketEvents.NoteUpdated);
+      socket.off(SocketEvents.NoteDeleted);
+      socket.off(SocketEvents.NoteMoved);
     };
   }, [socket, queryClient]);
 
@@ -185,37 +184,37 @@ const StickyNotes = () => {
       <div className="flex flex-1">
         <Sidebar />
         <TransformWrapper>
-          {({ state }) => (
-            <TransformComponent>
-              <div
-                ref={dropRef}
-                id="canvas-area"
-                className="relative bg-green-50 w-[50000px] h-[50000px] pt-16"
-              >
-                {userNotes &&
-                  !isLoading &&
-                  userNotes?.map((note: Note) => (
-                    <DraggableNote
-                      isLocked={note.userId !== isNoteEnabled}
-                      key={note.id}
-                      note={{
-                        id: note.id,
-                        position: note.position ?? { x: 0, y: 0 },
-                        content: note.content,
-                      }}
-                      moveNote={isNoteEnabled && moveNote}
-                      updateNoteText={(id, updatedNote) =>
-                        editNote({
-                          id,
-                          updatedNote,
-                        })
-                      }
-                      deleteNote={removeNote}
-                    />
-                  ))}
-              </div>
-            </TransformComponent>
-          )}
+          {/* {({ state }) => ( */}
+          <TransformComponent>
+            <div
+              ref={dropRef}
+              id="canvas-area"
+              className="relative bg-green-50 w-[50000px] h-[50000px] pt-16"
+            >
+              {userNotes &&
+                !isLoading &&
+                userNotes?.map((note: Note) => (
+                  <DraggableNote
+                    isLocked={note.userId !== isNoteEnabled}
+                    key={note.id}
+                    note={{
+                      id: note.id,
+                      position: note.position ?? { x: 0, y: 0 },
+                      content: note.content,
+                    }}
+                    moveNote={isNoteEnabled && moveNote}
+                    updateNoteText={(id, updatedNote) =>
+                      editNote({
+                        id,
+                        updatedNote,
+                      })
+                    }
+                    deleteNote={removeNote}
+                  />
+                ))}
+            </div>
+          </TransformComponent>
+          {/* )} */}
         </TransformWrapper>
       </div>
     </div>

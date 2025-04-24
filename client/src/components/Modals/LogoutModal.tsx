@@ -9,8 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "./ui/alert-dialog";
-import { useAuth } from "../store/auth-context";
+} from "../ui/alert-dialog";
+import { useAuth } from "../../store/auth-context";
 
 const LogoutModal = () => {
   const { logout } = useAuth();

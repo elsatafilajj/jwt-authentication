@@ -1,15 +1,16 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
-import { useAuth } from "../store/auth-context";
-import LogoutModal from "./Modal";
+import { useAuth } from "../../store/auth-context";
+import LogoutModal from "../Modals/LogoutModal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createNote } from "../api/apiNotes";
+import { createNote } from "../../api/apiNotes";
 import { toast } from "react-toastify";
 
 const Header = () => {
   const { user, isLoading } = useAuth();
   const queryClient = useQueryClient();
+  const location = useLocation();
 
   // const navigate = useNavigate();
 
@@ -56,12 +57,14 @@ const Header = () => {
         >
           Notes
         </Link>
-        <button
-          onClick={handleClickCreateNote}
-          className="bg-green-600 text-white px-4 py-1.5 rounded-full font-semibold hover:bg-green-700 transition"
-        >
-          + New
-        </button>
+        {location.pathname === "/StickyNotes" && (
+          <button
+            onClick={handleClickCreateNote}
+            className="bg-green-600 text-white px-4 py-1.5 rounded-full font-semibold hover:bg-green-700 transition"
+          >
+            + New
+          </button>
+        )}
       </nav>
 
       <div className="flex items-center gap-4">

@@ -23,13 +23,24 @@ export const adminFetchRooms = async () => {
 
 export const fetchRoomsByUserId = async () => {
   const token = localStorage.getItem("accessToken");
-  const response = await axiosInstance.get("/my-rooms", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  console.log("rooms", response.data);
-  return response.data;
+
+  try {
+    const response = await axiosInstance.get("/my-rooms", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("rooms", response.data);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      console.warn("No rooms found for user.");
+      return [];
+    }
+
+    throw error;
+  }
 };
 
 export const createRoom = async (newRoom: Room) => {
@@ -54,7 +65,22 @@ export const joinRoom = async (userId: string) => {
   return response.data;
 };
 
-export const deleteRoom = async (roomId: string) => {
-  const response = await axiosInstance.delete(`/rooms/{${roomId}}`);
+export const deleteRoomById = async (id: string) => {
+  const token = localStorage.getItem("token");
+  const response = await axiosInstance.delete(`/rooms/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+export const editRoomById = async (id: string, data: { name: string }) => {
+  const token = localStorage.getItem("token");
+  const response = await axiosInstance.patch(`/rooms/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return response.data;
 };

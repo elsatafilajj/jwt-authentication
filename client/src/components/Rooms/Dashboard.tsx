@@ -1,56 +1,45 @@
 import React from "react";
-import { Link } from "react-router-dom";
-
+import CreateRoomModal from "../Modals/CreateRoomModal";
 import { useQuery } from "@tanstack/react-query";
-import { fetchUserInfo } from "../../api/api";
-import Rooms from "./Rooms";
+import { fetchRoomsByUserId } from "../../api/apiRooms";
+import Room from "./Room";
 
 const Dashboard = () => {
-  const { data, isLoading } = useQuery({
-    queryKey: ["user"],
-    queryFn: fetchUserInfo,
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["rooms"],
+    queryFn: fetchRoomsByUserId,
   });
 
-  return (
-    <>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
-        <h2 className="text-4xl font-bold mb-6 text-gray-800">
-          Welcome to Your Dashboard
-        </h2>
+  if (isLoading)
+    return <p className="text-center text-gray-600">Loading rooms...</p>;
+  if (isError)
+    return (
+      <p className="text-center text-red-600">
+        Error: {(error as Error).message}
+      </p>
+    );
 
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-6 space-y-4">
-          {isLoading ? (
-            <p className="text-center text-gray-500">Loading user info...</p>
-          ) : (
-            <>
-              <div className="space-y-2">
-                <p>
-                  <span className="font-semibold text-gray-700">Email:</span>{" "}
-                  {data?.email}
-                </p>
-                <p>
-                  <span className="font-semibold text-gray-700">Username:</span>{" "}
-                  {data?.username}
-                </p>
-                <p>
-                  <span className="font-semibold text-gray-700">Role:</span>{" "}
-                  {data?.role}
-                </p>
-              </div>
-            </>
-          )}
-        </div>
-        <Link
-          to="/stickyNotes"
-          className="px-5 mt-5 py-2 rounded-full bg-green-600 hover:bg-green-700 transition duration-300 text-white"
-        >
-          Go to your projects
-        </Link>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-100 to-white px-8 py-12">
+      <div className="max-w-7xl mx-auto">
+        <header className="flex items-center justify-between mb-10">
+          <h1 className="ml-5 text-3xl font-bold text-gray-800 tracking-tight">
+            Join a Room
+          </h1>
+          <CreateRoomModal />
+        </header>
+
+        {data.length === 0 ? (
+          <p>You haven't created any rooms yet.</p>
+        ) : (
+          <ul className="w-full grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {data?.map((room) => (
+              <Room key={room.id} data={room} />
+            ))}
+          </ul>
+        )}
       </div>
-      <div>
-        <Rooms />
-      </div>
-    </>
+    </div>
   );
 };
 

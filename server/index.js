@@ -97,7 +97,7 @@ const generateTokens = (email, role) => {
   };
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
     // expiresIn: "15m",
-    expiresIn: "15m",
+    expiresIn: "5m",
   });
 
   const refreshToken = jwt.sign(payload, process.env.JWT_SECRET, {
@@ -455,6 +455,37 @@ app.delete("/rooms/:roomId", requireAuth, async (req, res) => {
   await saveRooms(rooms);
 
   res.status(200).json({ message: "Room deleted successfully" });
+});
+
+app.patch("/rooms/:roomId", requireAuth, async (req, res) => {
+  const { roomId } = req.params;
+  const { name } = req.body;
+  const { userId } = req.user;
+
+  // Find the room by its ID
+  const room = rooms.find((r) => r.id === roomId);
+
+  if (!room) {
+    return res.status(404).json({ message: "Room not found" });
+  }
+
+  // Check if the user is the host or an admin
+  if (room.host !== userId && !userIsAdmin(userId)) {
+    return res
+      .status(403)
+      .json({ message: "You are not authorized to edit this room" });
+  }
+
+  // Update room fields (for now, just name)
+  if (name) {
+    room.name = name;
+    room.updatedAt = new Date().toISOString();
+  }
+
+  // Save the updated rooms to the file
+  await saveRooms(rooms);
+
+  res.status(200).json({ message: "Room updated successfully", room });
 });
 
 // Start the server

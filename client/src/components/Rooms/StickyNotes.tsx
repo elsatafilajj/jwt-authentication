@@ -178,9 +178,6 @@ const StickyNotes = () => {
   }
   return (
     <div className="flex flex-col h-screen">
-      <header className="bg-green-700 text-white p-4 text-center font-semibold ">
-        Sticky Notes App
-      </header>
       <div className="flex flex-1">
         <Sidebar />
         <TransformWrapper>

@@ -9,8 +9,9 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { SocketProvider } from "./store/socket-context";
 
+export const queryClient = new QueryClient();
+
 export default function App() {
-  const queryClient = new QueryClient();
   return (
     <DndProvider backend={HTML5Backend}>
       <QueryClientProvider client={queryClient}>

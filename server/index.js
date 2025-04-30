@@ -1,5 +1,4 @@
 const express = require("express");
-// const bcrypt = require("./node_modules/bcryptjs/umd");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs-extra");
@@ -93,19 +92,18 @@ const requireAuth = async (req, res, next) => {
 };
 
 // Generate JWT access and refresh tokens
-const generateTokens = (email, role) => {
+const generateTokens = (userId, role) => {
   const payload = {
-    userId: email,
+    userId: userId,
     role: role,
   };
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-    // expiresIn: "15m",
-    expiresIn: "15m",
+    expiresIn: "1m",
   });
 
   const refreshToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: "15m",
     // expiresIn: "7d",
-    expiresIn: "7d",
   });
 
   // console.log("From generate token:", accessToken);
@@ -150,11 +148,15 @@ app.post("/signup", async (req, res) => {
     return res.status(400).json({ msg: "User already exists" });
   }
 
+  // Make unique id
+  const userId = Date.now();
+
   // Hash the password
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // Create new user with role
   const newUser = {
+    userId,
     username,
     email,
     password: hashedPassword,
@@ -163,7 +165,7 @@ app.post("/signup", async (req, res) => {
 
   // Generate JWT tokens (access and refresh)
   const { accessToken, refreshToken } = generateTokens(
-    newUser.email,
+    newUser.userId,
     newUser.role
   );
 
@@ -202,9 +204,9 @@ app.post("/login", async (req, res) => {
     return res.status(400).json({ msg: "Invalid credentials" });
   }
 
-  console.log(user.email, user.role);
+  console.log(user.userId, user.role);
 
-  const { accessToken, refreshToken } = generateTokens(user.email, user.role);
+  const { accessToken, refreshToken } = generateTokens(user.userId, user.role);
   user.refreshToken = refreshToken;
 
   await saveUsers(users);
@@ -222,12 +224,17 @@ app.post("/login", async (req, res) => {
 app.post("/refresh-token", async (req, res) => {
   const { refreshToken } = req.body;
 
+  console.log(refreshToken);
+
   if (!refreshToken) {
     return res.status(400).json({ msg: "Refresh token required" });
   }
 
   const users = await loadUsers();
   const user = users.find((user) => user.refreshToken === refreshToken);
+
+  console.log(user);
+
   if (!user) {
     return res.status(401).json({ msg: "Invalid refresh token" });
   }
@@ -236,7 +243,7 @@ app.post("/refresh-token", async (req, res) => {
     jwt.verify(refreshToken, process.env.JWT_SECRET);
 
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
-      user.email,
+      user.userId,
       user.role
     );
 
@@ -250,6 +257,85 @@ app.post("/refresh-token", async (req, res) => {
   }
 });
 
+// Edit user info (username, email)
+app.patch("/users/:userId", async (req, res) => {
+  const userId = req.params.userId;
+
+  const { newUsername, newEmail } = req.body;
+
+  const userIdInt = Number(userId);
+
+  if (!newUsername && !newEmail) {
+    return res.status(400).json({ msg: "Required fields missing" });
+  }
+
+  const users = await loadUsers();
+
+  const userIndex = users.findIndex((user) => user.userId === userIdInt);
+
+  if (userIndex === -1) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  if (newUsername) users[userIndex].username = newUsername;
+  if (newEmail) users[userIndex].email = newEmail;
+
+  await saveUsers(users);
+
+  res.status(200).json({ msg: "User updated successfully" });
+});
+
+// Delete User
+app.delete("/users/:userId", requireAuth, async (req, res) => {
+  const userIdInt = Number(req.params.userId);
+
+  const users = await loadUsers();
+  const userIndex = users.findIndex((user) => user.userId === userIdInt);
+
+  if (userIndex === -1) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  users.splice(userIndex, 1);
+
+  await saveUsers(users);
+
+  res.json({ msg: "User deleted successfully" });
+});
+
+// Change user password
+app.patch("/users/password-change/:userId", requireAuth, async (req, res) => {
+  const { oldPassword, newPassword, confirmNewPassword } = req.body;
+
+  const userIdInt = Number(req.params.userId);
+
+  // Fetch users from database or data source
+  const users = await loadUsers();
+  const userIndex = users.findIndex((user) => user.userId === userIdInt);
+
+  if (userIndex === -1) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  const isMatch = await bcrypt.compare(oldPassword, users[userIndex].password);
+
+  const newPasswordHashed = await bcrypt.hash(newPassword, 10);
+
+  // Update user details only if provided
+  if (isMatch && newPassword === confirmNewPassword) {
+    users[userIndex] = {
+      ...users[userIndex],
+      password: newPasswordHashed,
+      updatedAt: new Date().toISOString(),
+    };
+  } else {
+    return res.status(400).json({ msg: "Invalid password" });
+  }
+  await saveUsers(users);
+
+  res.json(users[userIndex]);
+});
+
 // ✅ Admin-only endpoint
 app.get("/admin/data", authenticateToken, requireAdmin, async (req, res) => {
   res.json({ message: "Welcome Admin 👑. This is top-secret data." });
@@ -259,7 +345,7 @@ app.get("/admin/data", authenticateToken, requireAdmin, async (req, res) => {
 app.get("/me", authenticateToken, async (req, res) => {
   const users = await loadUsers();
 
-  const currentUser = users.find((user) => user.email === req.user.userId);
+  const currentUser = users.find((user) => user.userId === req.user.userId);
 
   if (!currentUser) {
     return res.status(404).json({ msg: "User not found" });
@@ -349,8 +435,9 @@ app.delete("/notes/:id", authenticateToken, async (req, res) => {
   await saveNotes(filteredNotes);
   res.json({ msg: "Note deleted" });
 });
-console.log("USERS_FILE:", USERS_FILE);
-console.log("NOTES_FILE:", NOTES_FILE);
+
+// console.log("USERS_FILE:", USERS_FILE);
+// console.log("NOTES_FILE:", NOTES_FILE);
 
 // GET all rooms (admin only access for all rooms)
 app.get("/rooms", requireAuth, async (req, res) => {
@@ -360,18 +447,18 @@ app.get("/rooms", requireAuth, async (req, res) => {
 
 app.get("/my-rooms", requireAuth, async (req, res) => {
   const { userId } = req.user;
-  console.log("user id ", userId);
+  // console.log("user id ", userId);
 
   if (!userId) {
     return res.status(400).json({ message: "User not found" });
   }
 
   const rooms = await loadRooms();
-  console.log("All rooms:", rooms);
+  // console.log("All rooms:", rooms);
 
   // Filter the rooms where the current user is the host
   const userRooms = rooms.filter((room) => room.host === userId);
-  console.log("user rooms", userRooms);
+  // console.log("user rooms", userRooms);
 
   if (userRooms.length === 0) {
     return res.status(404).json({ message: "No rooms found for this user" });
@@ -462,7 +549,7 @@ app.delete("/rooms/:roomId", requireAuth, async (req, res) => {
 
 // Start the server
 const http = require("http");
-const { Server } = require("socket.io");
+const { debug } = require("console");
 
 const server = http.createServer(app);
 
@@ -559,36 +646,4 @@ io.on("connection", (socket) => {
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
-
-/* WEBSOCKET FUNCTIONS */
-
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-
-  // socket.on("new_note", async (note) => {
-  //   const notes = await loadNotes();
-  //   notes.push(note);
-  //   await saveNotes(notes);
-  //   io.emit("note_added", note);
-  // });
-
-  /* TO BE IMPLEMENTED */
-  // socket.on("updated_note", async (note) => {
-  //   const notes = await loadNotes();
-  //   notes.push(note);
-  //   await saveNotes(notes);
-  //   io.emit("note_updated", note);
-  // });
-
-  // socket.on("moved_note", async (note) => {
-  //   const notes = await loadNotes();
-  //   notes.push(note);
-  //   await saveNotes(notes);
-  //   io.emit("note_moved", note);
-  // });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
 });

@@ -57,6 +57,66 @@ export const login = async (user: Partial<SignupProps>) => {
   return response.data;
 };
 
+export const deleteUser = async (userId: number) => {
+  const token = localStorage.getItem("accessToken");
+  const response = await axiosInstance.delete(`/users/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
+
+export const editUser = async ({
+  userId,
+  newEmail,
+  newUsername,
+}: {
+  userId: number;
+  newUsername: string;
+  newEmail: string;
+}) => {
+  const token = localStorage.getItem("accessToken");
+  console.log(newEmail, newUsername);
+  // Send the PATCH request to the API
+  const response = await axiosInstance.patch(
+    `/users/${userId}`,
+    { newUsername, newEmail },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  // If the update is successful, return the updated user info
+  return response.data;
+};
+
+export const editPassword = async ({
+  userId,
+  oldPassword,
+  newPassword,
+  confirmNewPassword,
+}: {
+  userId: number;
+  oldPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}) => {
+  const token = localStorage.getItem("accessToken");
+
+  console.log(userId);
+
+  const response = await axiosInstance.patch(
+    `/users/password-change/${userId}`,
+    { oldPassword, newPassword, confirmNewPassword },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return response.data;
+};
+
 export const fetchUserInfo = async () => {
   const token = localStorage.getItem("accessToken");
 

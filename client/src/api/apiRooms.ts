@@ -17,19 +17,25 @@ export const adminFetchRooms = async () => {
     },
   });
 
-  console.log("admin", response.data);
+  // console.log("admin", response.data);
   return response.data;
 };
 
 export const fetchRoomsByUserId = async () => {
   const token = localStorage.getItem("accessToken");
-  const response = await axiosInstance.get("/my-rooms", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  console.log("rooms", response.data);
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/my-rooms", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("rooms", response.data);
+    return response.data;
+  } catch (error) {
+    if (error.response === 404) {
+      return {};
+    }
+  }
 };
 
 export const createRoom = async (newRoom: Room) => {
@@ -55,6 +61,9 @@ export const joinRoom = async (userId: string) => {
 };
 
 export const deleteRoom = async (roomId: string) => {
-  const response = await axiosInstance.delete(`/rooms/{${roomId}}`);
+  const token = localStorage.getItem("accessToken");
+  const response = await axiosInstance.delete(`/rooms/{${roomId}}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return response.data;
 };

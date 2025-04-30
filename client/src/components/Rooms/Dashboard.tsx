@@ -4,12 +4,18 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserInfo } from "../../api/api";
 import Rooms from "./Rooms";
+// import { fetchRoomsByUserId } from "../../api/apiRooms";
 
 const Dashboard = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUserInfo,
   });
+
+  // const { data: roomData, isLoading: areRoomsLoading } = useQuery({
+  //   queryKey: ["rooms"],
+  //   queryFn: fetchRoomsByUserId,
+  // });
 
   return (
     <>
@@ -41,15 +47,14 @@ const Dashboard = () => {
           )}
         </div>
         <Link
-          to="/stickyNotes"
-          className="px-5 mt-5 py-2 rounded-full bg-green-600 hover:bg-green-700 transition duration-300 text-white"
+          to="/sticky-notes"
+          className="px-5  mt-5 py-2 rounded-full bg-green-600 hover:bg-green-700 transition duration-300 text-white"
         >
           Go to your projects
         </Link>
-      </div>
-      <div>
         <Rooms />
       </div>
+      <div></div>
     </>
   );
 };

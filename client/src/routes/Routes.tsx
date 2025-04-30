@@ -13,6 +13,7 @@ import AdminDashboard from "../components/Rooms/AdminDashboard";
 import StickyNotes from "../components/Rooms/StickyNotes";
 
 import { AdminLayout } from "../layout/AdminLayout";
+import Profile from "../components/Authentication/Profile";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -28,6 +29,7 @@ export const appRoutes: RouteObject[] = [
     children: [
       { path: RouteNames.Dashboard, element: <Dashboard /> },
       { path: RouteNames.StickyNotes, element: <StickyNotes /> },
+      { path: RouteNames.Profile, element: <Profile /> },
     ],
   },
   {

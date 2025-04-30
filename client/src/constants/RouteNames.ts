@@ -3,7 +3,7 @@ export const RouteNames = {
   Signup: "/signup",
   Dashboard: "/dashboard",
   AdminDashboard: "/adminDashboard",
-  StickyNotes: "/stickyNotes",
+  StickyNotes: "/rooms",
   // Logs: '/logs',
   // Home: '/profile',
   // Profile: '/profile',

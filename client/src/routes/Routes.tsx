@@ -27,7 +27,10 @@ export const appRoutes: RouteObject[] = [
     element: <MainLayout />,
     children: [
       { path: RouteNames.Dashboard, element: <Dashboard /> },
-      { path: RouteNames.StickyNotes, element: <StickyNotes /> },
+      {
+        path: `${RouteNames.StickyNotes}/:roomId`,
+        element: <StickyNotes currentRoomId="" />,
+      },
     ],
   },
   {

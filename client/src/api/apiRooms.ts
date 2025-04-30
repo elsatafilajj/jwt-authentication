@@ -84,3 +84,20 @@ export const editRoomById = async (id: string, data: { name: string }) => {
   });
   return response.data;
 };
+
+export const joinRoomById = async (roomId: string) => {
+  const token = localStorage.getItem("accessToken");
+  console.log("Token:", token);
+  const response = await axiosInstance.patch(
+    `/rooms/${roomId}`,
+    {},
+
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  console.log(response.data);
+  return response.data;
+};

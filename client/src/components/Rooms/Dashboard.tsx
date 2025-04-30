@@ -20,8 +20,8 @@ const Dashboard = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-100 to-white px-8 py-12">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-green-100 to-white px-30 py-12 ">
+      <div className="mx-auto">
         <header className="flex items-center justify-between mb-10">
           <h1 className="ml-5 text-3xl font-bold text-gray-800 tracking-tight">
             Join a Room

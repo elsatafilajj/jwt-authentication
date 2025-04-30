@@ -39,7 +39,7 @@ export function Input(props: Props) {
           id={name}
           data-slot="input"
           className={cn(
-            "bg-green-100 border border-green-300 text-green-900 placeholder-green-600 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 w-full p-2.5 shadow-xs outline-none transition-[color,box-shadow]",
+            "bg-primary border border-primary text-green-900 placeholder-green-600 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 w-full p-2.5 shadow-xs outline-none transition-[color,box-shadow]",
             className
           )}
           {...field}

@@ -3,12 +3,13 @@ import { Note } from "../../api/apiNotes";
 import { useEffect, useRef, useState } from "react";
 import debounce from "lodash.debounce";
 import { useDrag } from "react-dnd";
+import { useParams } from "react-router-dom";
 
 interface DraggableNoteProps {
   note: { id: string; position: { x: number; y: number }; content: string };
   moveNote: (id: string, newX: number, newY: number) => void;
   updateNoteText: (id: string, updatedNote: Partial<Note>) => void;
-  deleteNote: (id: string) => void;
+  deleteNote: ({ roomId, id }: { roomId: string; id: string }) => void;
   isLocked: boolean;
 }
 
@@ -19,6 +20,7 @@ const DraggableNote = ({
   deleteNote,
   isLocked,
 }: DraggableNoteProps) => {
+  const currentRoomId = useParams();
   const dragRef = useRef<HTMLDivElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [localContent, setLocalContent] = useState(note.content);
@@ -112,7 +114,11 @@ const DraggableNote = ({
 
       {!isLocked ? (
         <button
-          onClick={() => deleteNote(note.id)}
+          onClick={() => {
+            if (currentRoomId.roomId) {
+              deleteNote({ roomId: currentRoomId.roomId, id: note.id });
+            }
+          }}
           className="absolute top-2 right-2 text-green-600 hover:text-green-700 rounded-full p-1 hover:bg-green-100 transition-all"
         >
           X

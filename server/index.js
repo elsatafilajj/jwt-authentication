@@ -121,7 +121,6 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
-
 // Middleware to check admin role
 const requireAdmin = async (req, res, next) => {
   const users = await loadUsers();
@@ -216,6 +215,7 @@ app.post("/login", async (req, res) => {
 });
 
 // Refresh Token
+// Refresh Token
 app.post("/refresh-token", async (req, res) => {
   const { refreshToken } = req.body;
 
@@ -269,23 +269,39 @@ app.get("/me", authenticateToken, async (req, res) => {
 });
 
 // Get all notes (auth required)
+// Get all notes for a specific room (auth required)
 app.get("/notes", authenticateToken, async (req, res) => {
+  const { roomId } = req.query;
+
+  if (!roomId) {
+    return res.status(400).json({ msg: "Room ID is required" });
+  }
+
   const notes = await loadNotes();
-  // const userNotes = notes.filter((note) => note.userId === req.user.userId);
-  res.json(notes);
+  const roomNotes = notes.filter((note) => note.roomId === roomId);
+
+  res.json(roomNotes);
 });
 
 // Create a new note
+// Create a new note in a specific room
 app.post("/notes", authenticateToken, async (req, res) => {
-  const { content, position } = req.body;
+  const { content, position, roomId } = req.body;
+
+  if (!roomId) {
+    return res.status(400).json({ msg: "Room ID is required" });
+  }
 
   const newNote = {
     id: Date.now().toString(), // Unique ID
     content,
     position: position || { x: 0, y: 0 },
+    roomId,
     userId: req.user.userId,
     createdAt: new Date().toISOString(),
   };
+
+  console.log("note", newNote);
 
   const notes = await loadNotes();
   notes.push(newNote);
@@ -297,13 +313,21 @@ app.post("/notes", authenticateToken, async (req, res) => {
 });
 
 // Update a note
-app.put("/notes/:id", authenticateToken, async (req, res) => {
-  const { id } = req.params;
+// Update a note in a specific room
+app.put("/notes/:roomId/:id", authenticateToken, async (req, res) => {
+  const { roomId, id } = req.params; // Destructure both roomId and id
   const { content, position } = req.body;
+
+  if (!roomId) {
+    return res.status(400).json({ msg: "Room ID is required" });
+  }
 
   const notes = await loadNotes();
   const noteIndex = notes.findIndex(
-    (note) => note.id === id && note.userId === req.user.userId
+    (note) =>
+      note.id === id &&
+      note.roomId === roomId &&
+      note.userId === req.user.userId
   );
 
   if (noteIndex === -1) {
@@ -317,26 +341,28 @@ app.put("/notes/:id", authenticateToken, async (req, res) => {
     updatedAt: new Date().toISOString(),
   };
 
-  if (content !== undefined) {
-    notes[noteIndex].content = content;
-  }
-  if (position !== undefined) {
-    notes[noteIndex].position = position;
-  }
-  notes[noteIndex].updatedAt = new Date().toISOString();
-
   await saveNotes(notes);
 
   res.json(notes[noteIndex]);
 });
 
-// Delete a note
-app.delete("/notes/:id", authenticateToken, async (req, res) => {
+// Delete a note from a specific room
+app.delete("/notes/:roomId/:id", authenticateToken, async (req, res) => {
+  console.log("reqed");
   const { id } = req.params;
+  const { roomId } = req.params;
+
+  if (!roomId) {
+    return res.status(400).json({ msg: "Room ID is required" });
+  }
 
   const notes = await loadNotes();
+
   const filteredNotes = notes.filter(
-    (note) => note.id !== id || note.userId !== req.user.userId
+    (note) =>
+      note.id !== id ||
+      note.roomId !== roomId ||
+      note.userId !== req.user.userId
   );
 
   if (notes.length === filteredNotes.length) {
@@ -346,6 +372,7 @@ app.delete("/notes/:id", authenticateToken, async (req, res) => {
   await saveNotes(filteredNotes);
   res.json({ msg: "Note deleted" });
 });
+
 console.log("USERS_FILE:", USERS_FILE);
 console.log("NOTES_FILE:", NOTES_FILE);
 
@@ -364,11 +391,11 @@ app.get("/my-rooms", requireAuth, async (req, res) => {
   }
 
   const rooms = await loadRooms();
-  console.log("All rooms:", rooms);
+  // console.log("All rooms:", rooms);
 
   // Filter the rooms where the current user is the host
   const userRooms = rooms.filter((room) => room.host === userId);
-  console.log("user rooms", userRooms);
+  // console.log("user rooms", userRooms);
 
   if (userRooms.length === 0) {
     return res.status(404).json({ message: "No rooms found for this user" });
@@ -382,7 +409,7 @@ app.post("/rooms", requireAuth, async (req, res) => {
   const { name, host } = req.body;
 
   // Generate a unique room ID (you can use a library or create your own)
-  const roomId = `roomId${Date.now()}`;
+  const roomId = `${Date.now()}`;
 
   // Create the new room object
   const newRoom = {
@@ -403,9 +430,14 @@ app.post("/rooms", requireAuth, async (req, res) => {
   res.status(201).json(newRoom);
 });
 
-app.post("/rooms/:roomId/join", requireAuth, async (req, res) => {
+///join
+app.patch("/rooms/:roomId", requireAuth, async (req, res) => {
   const { roomId } = req.params;
   const { userId } = req.user;
+
+  console.log("1", roomId);
+  console.log(typeof roomId);
+  console.log("2", userId);
 
   // Find the room by its ID
   const room = rooms.find((r) => r.id === roomId);
@@ -413,11 +445,18 @@ app.post("/rooms/:roomId/join", requireAuth, async (req, res) => {
   if (!room) {
     return res.status(404).json({ message: "Room not found" });
   }
+  console.log(typeof room.id);
+  console.log("3", room.id);
+  console.log(room);
+  console.log(room.participants);
+  console.log(room.participants.includes(userId));
 
   // Check if the user is already in the room
   if (room.participants.includes(userId)) {
     return res.status(400).json({ message: "User is already in the room" });
   }
+
+  console.log(userId);
 
   // Add the user to the participants list
   room.participants.push(userId);
@@ -426,6 +465,8 @@ app.post("/rooms/:roomId/join", requireAuth, async (req, res) => {
   // Save the updated rooms to the file
   await saveRooms(rooms);
 
+  console.log("roomId from params:", roomId); // Check the value coming from the URL params
+  console.log("room id in rooms:", room.id);
   res.status(200).json(room);
 });
 
@@ -462,6 +503,7 @@ app.patch("/rooms/:roomId", requireAuth, async (req, res) => {
   const { name } = req.body;
   const { userId } = req.user;
 
+  console.log("test", roomId);
   // Find the room by its ID
   const room = rooms.find((r) => r.id === roomId);
 

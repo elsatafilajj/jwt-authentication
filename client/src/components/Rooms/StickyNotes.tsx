@@ -18,24 +18,32 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useAuth } from "../../store/auth-context";
 import { SocketEvents } from "../../types/socketEvents";
+import { useParams } from "react-router-dom";
 
 const StickyNotes = () => {
+  const currentRoomId = useParams();
+  const roomId = currentRoomId.roomId || "defaultRoomId";
   const queryClient = useQueryClient();
   const dropRef = useRef<HTMLDivElement>(null);
   const socket = useSocket();
   const { user, isPending } = useAuth();
 
   const { data: userNotes, isLoading } = useQuery({
-    queryKey: ["notes"],
-    queryFn: fetchNotes,
+    queryKey: ["notes", roomId],
+    queryFn: () => fetchNotes(roomId),
   });
 
   const { mutateAsync } = useMutation({
-    mutationFn: createNote,
+    mutationFn: (newNote: {
+      content: string;
+      position: { x: number; y: number };
+      roomId: string;
+    }) => createNote(newNote),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({
+        queryKey: ["notes", roomId],
+      });
       toast.success("You created a note! 🎉");
-
       socket?.emit(SocketEvents.NoteCreated, data);
     },
     onError: (error) => {
@@ -46,24 +54,31 @@ const StickyNotes = () => {
 
   const { mutate: editNote } = useMutation({
     mutationFn: ({
+      roomId,
       id,
       updatedNote,
     }: {
+      roomId: string;
       id: string;
       updatedNote: Partial<Note>;
-    }) => updateNote(id, updatedNote),
+    }) => updateNote(roomId, id, updatedNote),
 
     onSuccess: (variables) => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({
+        queryKey: ["notes", roomId],
+      });
       toast.success("Note updated! 🎉");
       socket?.emit(SocketEvents.NoteUpdated, variables);
     },
   });
 
   const { mutate: removeNote } = useMutation({
-    mutationFn: (id: string) => deleteNote(id),
-    onSuccess: (id) => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    mutationFn: ({ roomId, id }: { roomId: string; id: string }) =>
+      deleteNote(roomId, id),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["notes", roomId],
+      });
       toast.success("Note deleted!");
       socket?.emit(SocketEvents.NoteDeleted, id);
     },
@@ -73,6 +88,7 @@ const StickyNotes = () => {
     const updatedNote = userNotes?.find((note: Note) => note.id === id);
     if (updatedNote) {
       editNote({
+        roomId: roomId,
         id: updatedNote.id,
         updatedNote: {
           position: { x: newX, y: newY },
@@ -122,13 +138,15 @@ const StickyNotes = () => {
       const y = offset.y - boundingRect.top;
 
       const newNote = {
-        id: "",
+        // id: "",
         position: { x, y },
-        title: "Untitled",
+        // title: "Untitled",
         content: "",
+        roomId: roomId,
+        userId: user.email,
       };
-      mutateAsync(newNote as Note);
 
+      mutateAsync(newNote as Note);
       socket?.emit("new-note", newNote);
     },
   });
@@ -139,28 +157,29 @@ const StickyNotes = () => {
     if (!socket) return;
 
     socket.on(SocketEvents.NoteCreated, (newNote) => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      queryClient.refetchQueries({ queryKey: ["notes"] });
-      // toast.success("New note added by another user!");
-      console.log(newNote);
+      if (newNote.roomId === roomId) {
+        queryClient.setQueryData(["notes", roomId], (old: []) => {
+          if (!old) return [newNote];
+          return [...old, newNote];
+        });
+      }
     });
 
     socket.on(SocketEvents.NoteUpdated, (updatedNote) => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      // toast.success("A note was updated by another user!");
-      console.log(updatedNote);
+      if (updatedNote.roomId === roomId) {
+        queryClient.invalidateQueries({ queryKey: ["notes", roomId] });
+      }
     });
 
     socket.on(SocketEvents.NoteDeleted, (noteId) => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      // toast.success("A note was deleted by another user!");
+      queryClient.invalidateQueries({ queryKey: ["notes", roomId] });
       console.log(noteId);
     });
 
     socket.on(SocketEvents.NoteMoved, (updatedNote) => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      // toast.success("A note was moved by another user!");
-      console.log(updatedNote);
+      if (updatedNote.roomId === roomId) {
+        queryClient.invalidateQueries({ queryKey: ["notes", roomId] });
+      }
     });
 
     return () => {
@@ -169,7 +188,7 @@ const StickyNotes = () => {
       socket.off(SocketEvents.NoteDeleted);
       socket.off(SocketEvents.NoteMoved);
     };
-  }, [socket, queryClient]);
+  }, [socket, queryClient, roomId]);
 
   let isNoteEnabled;
 
@@ -181,37 +200,40 @@ const StickyNotes = () => {
       <div className="flex flex-1">
         <Sidebar />
         <TransformWrapper>
-          {/* {({ state }) => ( */}
-          <TransformComponent>
-            <div
-              ref={dropRef}
-              id="canvas-area"
-              className="relative bg-green-50 w-[50000px] h-[50000px] pt-16"
-            >
-              {userNotes &&
-                !isLoading &&
-                userNotes?.map((note: Note) => (
-                  <DraggableNote
-                    isLocked={note.userId !== isNoteEnabled}
-                    key={note.id}
-                    note={{
-                      id: note.id,
-                      position: note.position ?? { x: 0, y: 0 },
-                      content: note.content,
-                    }}
-                    moveNote={isNoteEnabled && moveNote}
-                    updateNoteText={(id, updatedNote) =>
-                      editNote({
-                        id,
-                        updatedNote,
-                      })
-                    }
-                    deleteNote={removeNote}
-                  />
-                ))}
-            </div>
-          </TransformComponent>
-          {/* )} */}
+          {({ state }) => (
+            <TransformComponent>
+              <div
+                ref={dropRef}
+                id="canvas-area"
+                className="relative bg-green-50 w-[50000px] h-[50000px] pt-16"
+              >
+                {userNotes &&
+                  !isLoading &&
+                  userNotes?.map((note: Note) => (
+                    <DraggableNote
+                      isLocked={note.userId !== isNoteEnabled}
+                      key={note.id}
+                      note={{
+                        id: note.id,
+                        position: note.position ?? { x: 0, y: 0 },
+                        content: note.content,
+                      }}
+                      moveNote={isNoteEnabled && moveNote}
+                      updateNoteText={(id, updatedNote) =>
+                        editNote({
+                          roomId: roomId,
+                          id,
+                          updatedNote,
+                        })
+                      }
+                      deleteNote={({ roomId, id }) =>
+                        removeNote({ roomId, id })
+                      }
+                    />
+                  ))}
+              </div>
+            </TransformComponent>
+          )}
         </TransformWrapper>
       </div>
     </div>
